@@ -6,112 +6,112 @@ class MyTextTheme {
   static const lightTextTheme = TextTheme(
       displayLarge: TextStyle(
           color: Color(0xFF1e1e1e),
-          fontFamily: 'Outfit',
+          fontFamily: 'Syne',
           fontWeight: FontWeight.w700),
       displayMedium: TextStyle(
           color: Color(0xFF1e1e1e),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 16,
           fontWeight: FontWeight.w500),
       displaySmall: TextStyle(
           color: Color(0xFF1e1e1e),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
           fontWeight: FontWeight.normal),
       bodySmall: TextStyle(
         color: Color(0xFF1e1e1e),
-        fontFamily: 'Outfit',
+        fontFamily: 'PlusJakartaSans',
         fontSize: 14,
       ),
       bodyMedium: TextStyle(
           color: Color(0xFF1e1e1e),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
           fontWeight: FontWeight.w500),
       bodyLarge: TextStyle(
           color: Color(0xFF1e1e1e),
-          fontFamily: 'Outfit',
+          fontFamily: 'Syne',
           fontSize: 14,
           fontWeight: FontWeight.w700),
       titleLarge: TextStyle(
           color: _color1d,
-          fontFamily: 'Outfit',
+          fontFamily: 'Syne',
           fontSize: 24,
           fontWeight: FontWeight.w700),
       titleMedium: TextStyle(
           color: _color1d,
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 16,
           fontWeight: FontWeight.w700),
       titleSmall: TextStyle(
           color: _color1d,
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
           fontWeight: FontWeight.w300),
       labelLarge: TextStyle(
           color: _color1d,
-          fontFamily: 'Outfit',
+          fontFamily: 'Syne',
           fontSize: 16,
           fontWeight: FontWeight.w700),
       labelMedium: TextStyle(
           color: Color(0xFF1e1e1e),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 16,
           fontWeight: FontWeight.w500));
 
   static const darkTextTheme = TextTheme(
       displayLarge: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'Syne',
           fontWeight: FontWeight.w700),
       displayMedium: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 16,
           fontWeight: FontWeight.w500),
       displaySmall: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
           fontWeight: FontWeight.normal),
       bodySmall: TextStyle(
         color: Color(0xFFEAEDEF),
-        fontFamily: 'Outfit',
+        fontFamily: 'PlusJakartaSans',
         fontSize: 14,
       ),
       bodyMedium: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
           fontWeight: FontWeight.w500),
       bodyLarge: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'Syne',
           fontSize: 14,
           fontWeight: FontWeight.w700),
       titleLarge: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'Syne',
           fontSize: 24,
           fontWeight: FontWeight.w700),
       titleMedium: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 18,
           fontWeight: FontWeight.w500),
       titleSmall: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
           fontWeight: FontWeight.w300),
       labelLarge: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'Syne',
           fontSize: 16,
           fontWeight: FontWeight.w700),
       labelMedium: TextStyle(
           color: Color(0xFFEAEDEF),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 16,
           fontWeight: FontWeight.w500));
 }

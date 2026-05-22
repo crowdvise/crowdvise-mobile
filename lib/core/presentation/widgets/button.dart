@@ -1,3 +1,5 @@
+import 'package:crowdvise/core/presentation/res/drawables.dart';
+import 'package:crowdvise/core/presentation/widgets/svg_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
@@ -27,13 +29,13 @@ class Button extends StatelessWidget {
       height: height ?? 48,
       width: width ?? double.infinity,
       decoration: BoxDecoration(
-        gradient: isEnabled ? mefaraiGradient : greyGradient,
-        borderRadius: BorderRadius.circular(50),
+        color: isEnabled ? electricBlue : grey900,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0A43CA).withValues(alpha: .05),
+            color: electricBlue.withValues(alpha: .5),
             offset: const Offset(0, 4),
-            blurRadius: 8,
+            blurRadius: 2,
           ),
         ],
       ),
@@ -47,16 +49,28 @@ class Button extends StatelessWidget {
           ),
         ),
         onPressed: isEnabled ? onPressed : null,
-        child:
-            isLoading == true
-                ? CupertinoActivityIndicator(color: theme.colorScheme.surface)
-                : Text(
-                  title,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 14,
-                    color: isEnabled ? theme.colorScheme.surface : neutral500,
+        child: isLoading == true
+            ? CupertinoActivityIndicator(color: white)
+            : Row(
+                spacing: 8,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+
+                      color: isEnabled ? white : neutral600,
+                    ),
                   ),
-                ),
+                  SvgImage(
+                    asset: icArrowRight,
+                    height: 12,
+                    color: isEnabled ? white : neutral600,
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -87,16 +101,10 @@ class BorderButton extends StatelessWidget {
       height: height ?? 48,
       width: width ?? double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: primary),
-        borderRadius: BorderRadius.circular(50),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0A43CA).withValues(alpha: .05),
-            offset: const Offset(0, 4),
-            blurRadius: 8,
-          ),
-        ],
+        color: nearBlack,
+
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: electricBlue, width: 2),
       ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -108,16 +116,26 @@ class BorderButton extends StatelessWidget {
           ),
         ),
         onPressed: isEnabled ? onPressed : null,
-        child:
-            isLoading == true
-                ? CupertinoActivityIndicator(color: theme.colorScheme.surface)
-                : Text(
-                  title,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 14,
-                    color: isEnabled ? primary : neutral500,
+        child: isLoading == true
+            ? CupertinoActivityIndicator(color: theme.colorScheme.surface)
+            : Row(
+                spacing: 8,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: 14,
+                      color: isEnabled ? electricBlue : neutral500,
+                    ),
                   ),
-                ),
+                  SvgImage(
+                    asset: icArrowRight,
+                    color: electricBlue,
+                    height: 14,
+                  ),
+                ],
+              ),
       ),
     );
   }

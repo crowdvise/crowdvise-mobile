@@ -7,40 +7,37 @@ final GlobalKey<ScaffoldMessengerState> snackbarKey =
     GlobalKey<ScaffoldMessengerState>();
 
 extension SnackbarStateless on BuildContext {
-  showSuccess(String message) {
-    // customFlushBar(message, 1).show(this);
+  void showSuccess(String message) {
     customToast(message, 1);
   }
 
-  showError(String message) {
-    // customFlushBar(message, 3).show(this);
+  void showError(String message) {
     customToast(message, 3);
   }
 
-  showWarning(String message) {
-    // customFlushBar(message, 2).show(this);
+  void showWarning(String message) {
     customToast(message, 2);
   }
 
-  logg(String log) {
+  void logg(String log) {
     return Logger().i(log);
   }
 }
 
 extension Snackbar on State {
-  showSuccess(String message) {
+  void showSuccess(String message) {
     context.showSuccess(message);
   }
 
-  logg(String log) {
+  void logg(String log) {
     context.logg(log);
   }
 
-  showError(String message) {
+  void showError(String message) {
     context.showError(message);
   }
 
-  showWarning(String message) {
+  void showWarning(String message) {
     context.showWarning(message);
   }
 }

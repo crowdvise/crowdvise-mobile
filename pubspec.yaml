@@ -44,6 +44,8 @@ dependencies:
   provider: ^6.1.5+1
   flutter_animate: ^4.5.2
   flutter_svg: ^2.3.0
+  url_launcher: ^6.3.2
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -63,23 +65,22 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # assets:
-  #   - assets/images/
-  #   - assets/svg/
-  #   - assets/icons/
-  #   - assets/config/
+  assets:
+    - assets/images/
+    - assets/vectors/
+    - assets/config/
 
   
-  # fonts:
-  #   - family: Outfit
-  #     fonts:
-  #       - asset: assets/fonts/Outfit-Light.ttf
-  #         weight: 300
-  #       - asset: assets/fonts/Outfit-Regular.ttf
-  #         weight: 400
-  #       - asset: assets/fonts/Outfit-Medium.ttf
-  #         weight: 500
-  #       - asset: assets/fonts/Outfit-semi-bold.ttf
-  #         weight: 600
-  #       - asset: assets/fonts/Outfit-Bold.ttf
-  #         weight: 700
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 500
+       
+
+    - family: Syne
+      fonts:
+        - asset: assets/fonts/Syne-Bold.ttf
+          weight: 600
+        - asset: assets/fonts/Syne-ExtraBold.ttf
+          weight: 700

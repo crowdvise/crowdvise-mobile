@@ -69,59 +69,62 @@ class _InputFieldState extends TextFieldState<InputField> {
         maxLines: widget.maxLines,
         minLines: widget.minLines,
         maxLength: widget.maxLength,
+
         onEditingComplete: widget.onAction,
         textInputAction: widget.inputAction,
-        style: theme.textTheme.labelMedium,
-        cursorColor: theme.colorScheme.onSurface,
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: white,
+          fontWeight: FontWeight.w500,
+        ),
+        cursorColor: grey200,
         inputFormatters: widget.inputFormatters,
         onTapOutside: (_) {
           focus.unfocus();
         },
+        maxLengthEnforcement: MaxLengthEnforcement.enforced,
         decoration: InputDecoration(
           hintText: widget.hint,
           errorText: widget.error,
-          prefixIcon:
-              widget.prefix == null
-                  ? null
-                  : SvgImage(
-                    asset: widget.prefix!,
-                    height: 20,
-                    width: 20,
-                    color: neutral700,
-                    fit: BoxFit.scaleDown,
-                  ),
+          prefixIcon: widget.prefix == null
+              ? null
+              : SvgImage(
+                  asset: widget.prefix!,
+                  height: 20,
+                  width: 20,
+                  color: grey200,
+                  fit: BoxFit.scaleDown,
+                ),
           prefixText: widget.prefixText,
           prefixStyle: theme.textTheme.bodyMedium?.copyWith(
             color: neutral700,
             fontWeight: FontWeight.bold,
           ),
-          suffix:
-              widget.isPassword
-                  ? Clickable(
-                    onPressed:
-                        () => setState(() {
-                          isPassword = !isPassword;
-                        }),
-                    child: SvgImage(
-                      asset: isPassword ? icEye : icEyeSlash,
-                      height: 20,
-                      width: 20,
-                    ),
-                  )
-                  : widget.isClear && value.isNotEmpty
-                  ? Clickable(
-                    onPressed: () {
-                      controller.clear();
-                    },
-                    child: SvgImage(
-                      asset: icClose,
-                      width: 24,
-                      height: 24,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                      fit: BoxFit.scaleDown,
-                    ),
-                  )
-                  : widget.suffix,
+          suffix: widget.isPassword
+              ? Clickable(
+                  onPressed: () => setState(() {
+                    isPassword = !isPassword;
+                  }),
+                  child: SvgImage(
+                    asset: isPassword ? icEye : icEyeSlash,
+                    height: 20,
+                    width: 20,
+                    color: white,
+                  ),
+                )
+              : widget.isClear && value.isNotEmpty
+              ? Clickable(
+                  onPressed: () {
+                    controller.clear();
+                  },
+                  child: SvgImage(
+                    asset: icClose,
+                    width: 24,
+                    height: 24,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    fit: BoxFit.scaleDown,
+                  ),
+                )
+              : widget.suffix,
         ),
       ),
     );
@@ -243,43 +246,37 @@ class _InputField2State extends State<InputField2> {
             color: theme.colorScheme.error,
           ),
 
-          prefixIcon:
-              widget.prefix == null
-                  ? null
-                  : SvgImage(
-                    asset: widget.prefix!,
-                    width: 20,
-                    height: 20,
-                    // color: neutral700,
-                    fit: BoxFit.scaleDown,
-                  ),
+          prefixIcon: widget.prefix == null
+              ? null
+              : SvgImage(
+                  asset: widget.prefix!,
+                  width: 20,
+                  height: 20,
+                  // color: neutral700,
+                  fit: BoxFit.scaleDown,
+                ),
 
-          suffix:
-              isPassword
-                  ? Clickable(
-                    onPressed:
-                        () => setState(() {
-                          isPassword = !isPassword;
-                        }),
-                    child: Container(
-                      width: 50,
-                      height: 20,
-                      alignment: Alignment.center,
-                      child: SvgImage(
-                        asset:
-                            isPassword
-                                ? 'assets/vectors/eye.svg'
-                                : 'assets/vectors/eye-slash.svg',
-                        width: 24,
-                        height: 24,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.7,
-                        ),
-                        fit: BoxFit.scaleDown,
-                      ),
+          suffix: isPassword
+              ? Clickable(
+                  onPressed: () => setState(() {
+                    isPassword = !isPassword;
+                  }),
+                  child: Container(
+                    width: 50,
+                    height: 20,
+                    alignment: Alignment.center,
+                    child: SvgImage(
+                      asset: isPassword
+                          ? 'assets/vectors/eye.svg'
+                          : 'assets/vectors/eye-slash.svg',
+                      width: 24,
+                      height: 24,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      fit: BoxFit.scaleDown,
                     ),
-                  )
-                  : null,
+                  ),
+                )
+              : null,
         ),
       ),
     );

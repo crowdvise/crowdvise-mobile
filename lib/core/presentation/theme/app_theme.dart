@@ -8,7 +8,7 @@ mixin AppTheme {
     return ThemeData.from(
       colorScheme: const ColorScheme.light(
         surface: Colors.white,
-        onSurface: Color(0xFF1e1e1e),
+        onSurface: white,
         tertiary: Color(0xFFA9D478), //textAccentLight,
         secondary: Color(0xffDBE3F3),
         error: errorForeground,
@@ -33,18 +33,19 @@ mixin AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: const TextStyle(
           color: Color(0xFFA4A7AE),
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
         ),
+        
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 12,
         ),
         filled: true,
-        fillColor: neutral100,
+        fillColor: Color(0xFF2A2A2A),
         errorStyle: const TextStyle(
           color: errorForeground,
-          fontFamily: 'Outfit',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
         ),
         border: _inputBorderLight,
@@ -62,7 +63,7 @@ mixin AppTheme {
 
           shadowColor: const Color(0xFF0A43CA).withValues(alpha: .05),
           textStyle: const TextStyle(
-            fontFamily: 'Outfit',
+            fontFamily: 'PlusJakartaSans',
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -70,7 +71,7 @@ mixin AppTheme {
           overlayColor: Colors.white,
           splashFactory: NoSplash.splashFactory,
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(50)),
+            borderRadius: BorderRadius.all(Radius.circular(24)),
           ),
         ),
       ),
@@ -112,7 +113,7 @@ mixin AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: const TextStyle(
           color: Color(0xFF959595),
-          fontFamily: 'DMSans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -123,7 +124,7 @@ mixin AppTheme {
         fillColor: const Color(0xff191D20),
         errorStyle: const TextStyle(
           color: errorForeground,
-          fontFamily: 'DMSans',
+          fontFamily: 'PlusJakartaSans',
           fontSize: 14,
         ),
         border: _inputBorderDark,
@@ -140,7 +141,7 @@ mixin AppTheme {
           foregroundColor: Colors.white,
           shadowColor: const Color(0xFF0A43CA).withValues(alpha: .05),
           textStyle: const TextStyle(
-            fontFamily: 'DMSans',
+            fontFamily: 'PlusJakartaSans',
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: Color(0xFFEAEDEF),
@@ -165,15 +166,15 @@ mixin AppTheme {
   static const _buttonDarkColor = Color(0xFFA9D478);
 
   static final _inputBorderLight = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(100),
-    borderSide: BorderSide(color: primary),
+    borderRadius: BorderRadius.circular(12),
+    borderSide: BorderSide(color: electricBlue),
   );
   static final _errorInputBorderLight = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(100),
-    borderSide: BorderSide(color: warning400),
+    borderRadius: BorderRadius.circular(12),
+    borderSide: BorderSide(color: error400),
   );
   static final _emptyInputBorderLight = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(100),
+    borderRadius: BorderRadius.circular(12),
     borderSide: BorderSide.none,
   );
 

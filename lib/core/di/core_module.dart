@@ -47,10 +47,10 @@ abstract class CoreModule {
       // value.remove(userRoleKey);
       // value.remove(savedIds);
 
-      navigator.currentState?.pushAndRemoveUntil(
-        CupertinoPageRoute(builder: (context) => Container()),
-        (route) => false,
-      );
+      // navigator.currentState?.pushAndRemoveUntil(
+      //   CupertinoPageRoute(builder: (context) => Container()),
+      //   (route) => false,
+      // );
     });
   }
 }

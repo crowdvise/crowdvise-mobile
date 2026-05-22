@@ -1,5 +1,6 @@
+import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
+import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
 import 'package:crowdvise/core/presentation/widgets/clickable.dart';
-import 'package:crowdvise/core/presentation/widgets/pop_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:crowdvise/core/presentation/manager/custom_provider.dart';
 import 'package:provider/provider.dart';
@@ -51,29 +52,47 @@ class ProviderWidget<T extends CustomProvider> extends StatelessWidget {
         create: (BuildContext context) => provider,
         lazy: lazy,
         child: Consumer<T>(
-          builder: (_, provider, __) {
+          builder: (_, provider, _) {
             return Scaffold(
-              backgroundColor: theme.colorScheme.surface,
+              backgroundColor: nearBlack,
               resizeToAvoidBottomInset: resizeInsets,
-              appBar:
-                  appBarTitle == null
-                      ? null
-                      : AppBar(
-                        backgroundColor: theme.colorScheme.surface,
-                        elevation: 0,
-                        centerTitle: true,
-                        title: Text(
-                          appBarTitle!,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontSize: 16,
-                          ),
+              appBar: appBarTitle == null
+                  ? null
+                  : AppBar(
+                      forceMaterialTransparency: true,
+                      backgroundColor: nearBlack,
+                      elevation: 0,
+                      centerTitle: true,
+                      title: Text(
+                        appBarTitle!,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontSize: 16,
+                          color: white,
                         ),
-                        leading:
-                            leading != null || leading == true
-                                ? PopWidget()
-                                : null,
-                        actions: actions,
                       ),
+                      leading: leading != null || leading == true
+                          ? GestureDetector(
+                              onTap: () => context.pop(),
+                              child: Container(
+                                margin: const EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.white24,
+                                    width: 1.5,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_back,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            )
+                          : null,
+                      actions: actions,
+                    ),
               body: SafeArea(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: padding),
@@ -133,33 +152,29 @@ class ConsumerWidget<T extends CustomProvider> extends StatelessWidget {
           return Scaffold(
             resizeToAvoidBottomInset: resizeInsets,
             backgroundColor: theme.colorScheme.surface,
-            appBar:
-                appBarTitle == null
-                    ? null
-                    : AppBar(
-                      backgroundColor: theme.colorScheme.surface,
-                      elevation: 0,
-                      centerTitle: true,
-                      title: Text(
-                        appBarTitle!,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontSize: 16,
-                        ),
-                      ),
-                      leading:
-                          leading != null || leading == true
-                              ? Clickable(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Icon(
-                                  Icons.keyboard_arrow_left_rounded,
-                                  color: theme.colorScheme.onSurface,
-                                  size: 24,
-                                ),
-                              )
-                              : null,
+            appBar: appBarTitle == null
+                ? null
+                : AppBar(
+                    backgroundColor: theme.colorScheme.surface,
+                    elevation: 0,
+                    centerTitle: true,
+                    title: Text(
+                      appBarTitle!,
+                      style: theme.textTheme.bodyLarge?.copyWith(fontSize: 16),
                     ),
+                    leading: leading != null || leading == true
+                        ? Clickable(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Icon(
+                              Icons.keyboard_arrow_left_rounded,
+                              color: theme.colorScheme.onSurface,
+                              size: 24,
+                            ),
+                          )
+                        : null,
+                  ),
             body: SafeArea(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: padding),

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
-const primary = Color(0xff7993F2);
+const electricOrange = Color(0xffFF5C00);
+const electricBlue = Color(0xFF5B7FFF);
+const vividGreen = Color(0xff00FF87);
 const secondary = Color(0xff77A8F5);
 const secondary20 = Color(0xffE4EEFD);
 const white = Color(0xffFFFFFF);
+const nearBlack = Color(0xff0A0A0B);
+const surface = Color(0xff111113);
 
 const grey200 = Color(0xffE9EAEB);
 const grey1111 = Color(0xff5E6572);

@@ -3,6 +3,7 @@ import 'package:crowdvise/core/presentation/utils/router_utils.dart';
 import 'package:crowdvise/core/presentation/manager/theme_provider.dart';
 import 'package:crowdvise/core/presentation/theme/app_theme.dart';
 import 'package:crowdvise/core/presentation/utils/snack_bar_utils.dart';
+import 'package:crowdvise/features/splash/screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,7 @@ class CrowdViseApp extends StatelessWidget with AppTheme {
     return ChangeNotifierProvider(
       create: (_) => ThemeProvider(context),
       child: Consumer<ThemeProvider>(
-        builder: (_, provider, __) {
+        builder: (_, provider, _) {
           SystemChrome.setSystemUIOverlayStyle(
             SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
@@ -33,11 +34,11 @@ class CrowdViseApp extends StatelessWidget with AppTheme {
               child: MaterialApp(
                 scaffoldMessengerKey: snackbarKey,
                 debugShowCheckedModeBanner: false,
-                title: 'Mefarai',
+                title: 'CrowdVise',
                 theme: provider.theme,
                 darkTheme: provider.darkThemeData,
                 navigatorKey: navigator,
-                initialRoute: '/',
+                initialRoute: SplashScreen.id,
                 navigatorObservers: [routeObserver],
                 onGenerateRoute: generateRoute,
               ),

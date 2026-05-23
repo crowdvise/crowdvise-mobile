@@ -7,7 +7,7 @@ mixin AppTheme {
   ThemeData lightTheme() {
     return ThemeData.from(
       colorScheme: const ColorScheme.light(
-        surface: Colors.white,
+        surface: nearBlack,
         onSurface: white,
         tertiary: Color(0xFFA9D478), //textAccentLight,
         secondary: Color(0xffDBE3F3),
@@ -42,7 +42,8 @@ mixin AppTheme {
           horizontal: 12,
         ),
         filled: true,
-        fillColor: Color(0xFF2A2A2A),
+        // fillColor: Color(0xFF2A2A2A),
+        fillColor: const Color(0xFF131314),
         errorStyle: const TextStyle(
           color: errorForeground,
           fontFamily: 'PlusJakartaSans',

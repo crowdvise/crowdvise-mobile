@@ -77,7 +77,7 @@ const mefaraiGradient = LinearGradient(
   stops: [0.05, 1.0],
   begin: Alignment.bottomLeft,
   end: Alignment.topRight,
-  colors: [Color(0xff7993F2), Color(0xffCBDCFF)],
+  colors: [electricBlue, Color(0xffCBDCFF)],
 );
 const greyGradient = LinearGradient(colors: [grey200, grey200]);
 const neutralGradient = LinearGradient(colors: [neutral100, neutral100]);

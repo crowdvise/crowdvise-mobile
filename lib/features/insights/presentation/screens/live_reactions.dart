@@ -1,182 +1,212 @@
+import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
+import 'package:crowdvise/core/presentation/utils/responsive.dart';
 import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
 import 'package:crowdvise/features/insights/presentation/manager/insights_provider.dart';
+import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
+import 'package:crowdvise/features/insights/presentation/screens/reaction_detail.dart';
+import 'package:crowdvise/features/session/presentation/widgets/ai_generated_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class LiveReactionsScreen extends StatefulWidget {
   static const id = '/live_reactions';
 
-  const LiveReactionsScreen({super.key});
+  const LiveReactionsScreen({super.key, required this.journeys});
+  final List<AgentJourney> journeys;
 
   @override
   State<LiveReactionsScreen> createState() => _LiveReactionsScreenState();
 }
 
 class _LiveReactionsScreenState extends State<LiveReactionsScreen> {
-  final List<PersonaReaction> _personas = const [
-    PersonaReaction(
-      initial: 'M',
-      color: Color(0xFF4285F4),
-      name: 'Marcus, 34',
-      role: 'Product Manager · San Francisco',
-      reaction: 'Subscribed',
-      reactionColor: Color(0xFF0FBC73),
-      quote:
-          '"This is exactly what my team needs. We\'ve been paying \$200/month for half this. I signed up on the spot."',
-    ),
-    PersonaReaction(
-      initial: 'P',
-      color: Color(0xFFEA4335),
-      name: 'Priya, 28',
-      role: 'Freelance Designer · Toronto',
-      reaction: 'Skeptical',
-      reactionColor: Color(0xFFF3B70F),
-      quote:
-          '"\$49 is steep for a solo. I\'d use it if there was a cheaper individual plan. The feature sounds useful though."',
-    ),
-    PersonaReaction(
-      initial: 'A',
-      color: Color(0xFF8B5CF6),
-      name: 'Aisha, 22',
-      role: 'Student / Side Hustler · Lagos',
-      reaction: 'Confused',
-      reactionColor: Color(0xFF4285F4),
-      quote:
-          '"What\'s an AI-generated report exactly? I don\'t know what I\'m getting. Needs more examples on the page."',
-    ),
-    PersonaReaction(
-      initial: 'D',
-      color: Color(0xFF6B7280),
-      name: 'David, 52',
-      role: 'Small Business Owner · Manchester',
-      reaction: 'Dropped off',
-      reactionColor: Color(0xFFF24968),
-      quote:
-          '"Left after seeing the pricing page. Happy with my current solution. No strong reason to switch."',
-      isMuted: true,
-    ),
-    PersonaReaction(
-      initial: 'T',
-      color: Color(0xFF0FBC73),
-      name: 'Tanya, 41',
-      role: 'VP of Growth · New York',
-      reaction: 'Excited',
-      reactionColor: Color(0xFF0FBC73),
-      quote:
-          '"We\'ve been waiting for something like this. Running focus groups costs us \$8k a pop. This changes everything."',
-    ),
-    PersonaReaction(
-      initial: 'K',
-      color: Color(0xFFF3B70F),
-      name: 'Kevin, 31',
-      role: 'Indie Founder · Berlin',
-      reaction: 'Subscribed',
-      reactionColor: Color(0xFF0FBC73),
-      quote:
-          '"Bootstrapped and scrappy. This is exactly the validation tool I\'ve been looking for. Worth every cent."',
-    ),
-  ];
+  late final List<PersonaReaction> _personas;
+
+  AgentJourney? _selectedJourney;
+
+  @override
+  void initState() {
+    super.initState();
+    _personas = _generatePersonasFromJourneys();
+    if (_personas.isNotEmpty) {
+      _selectedJourney = _personas.first.journey;
+    }
+  }
+
+  List<PersonaReaction> _generatePersonasFromJourneys() {
+    return widget.journeys.map((journey) {
+      final agent = journey.agent;
+      // Use the last reaction as the current "live" reaction state.
+      final lastReaction = journey.reactions.isNotEmpty
+          ? journey.reactions.last
+          : null;
+
+      final reactionBehavior = lastReaction?.behaviour ?? journey.finalOutcome;
+      final quote = lastReaction?.internalMonologue ?? "No recent thought.";
+
+      // Determine color based on behavior
+      Color reactionColor = Colors.grey;
+      bool isMuted = false;
+      String reactionText = reactionBehavior.toUpperCase();
+
+      switch (reactionBehavior.toLowerCase()) {
+        case 'converted':
+          reactionColor = const Color(0xFF0FBC73);
+          reactionText = 'Converted';
+          break;
+        case 'dropped':
+          reactionColor = const Color(0xFFF24968);
+          reactionText = 'Dropped off';
+          isMuted = true;
+          break;
+        case 'frustrated':
+          reactionColor = const Color(0xFFF24968);
+          reactionText = 'Frustrated';
+          break;
+        case 'confused':
+          reactionColor = const Color(0xFF4285F4);
+          reactionText = 'Confused';
+          break;
+        case 'delaying':
+          reactionColor = const Color(0xFFF3B70F);
+          reactionText = 'Delaying';
+          break;
+        case 'continuing':
+          reactionColor = const Color(0xFF0FBC73);
+          reactionText = 'Continuing';
+          break;
+        default:
+          reactionColor = Colors.grey;
+          reactionText = reactionBehavior;
+      }
+
+      // Assign an avatar color based on agent hash
+      final colors = [
+        const Color(0xFF4285F4),
+        const Color(0xFFEA4335),
+        const Color(0xFF8B5CF6),
+        const Color(0xFF0FBC73),
+        const Color(0xFFF3B70F),
+      ];
+      final color = colors[agent.id.hashCode % colors.length];
+
+      return PersonaReaction(
+        initial: agent.name.isNotEmpty ? agent.name[0].toUpperCase() : '?',
+        color: color,
+        name: '${agent.name}, ${agent.age}',
+        role: agent.location,
+        reaction: reactionText,
+        reactionColor: reactionColor,
+        quote: '"$quote"',
+        isMuted: isMuted,
+        journey: journey,
+      );
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ProviderWidget<InsightsProvider>(
+    return ProviderWidget(
       provider: InsightsProvider(),
+      appBarTitle: 'Live Reactions',
+      leading: true,
+      actions: [LiveGeneratedChip(), const Gap(8)],
       children: (provider, theme) {
+        // Calculate counts
+        final totalPersonas = _personas.length;
+        final respondedCount = _personas
+            .where(
+              (p) =>
+                  p.reaction.toLowerCase() != 'continuing' &&
+                  p.reaction.toLowerCase() != 'dropped off',
+            )
+            .length;
+
+        final listContent = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Gap(16),
+            Text(
+              '$totalPersonas personas · $respondedCount responded',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontSize: 14,
+                color: Colors.white54,
+              ),
+            ),
+            const Gap(24),
+            Expanded(
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                itemCount: _personas.length,
+                separatorBuilder: (_, _) => const Gap(12),
+                itemBuilder: (context, index) {
+                  final persona = _personas[index];
+                  final isSelected =
+                      Responsive.isDesktop(context) &&
+                      _selectedJourney == persona.journey;
+                  return GestureDetector(
+                    onTap: () {
+                      if (Responsive.isDesktop(context)) {
+                        setState(() {
+                          _selectedJourney = persona.journey;
+                        });
+                      } else {
+                        context.pushNamed(
+                          ReactionDetailScreen.id,
+                          args: persona.journey,
+                        );
+                      }
+                    },
+                    child: Container(
+                      decoration: isSelected
+                          ? BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: electricBlue),
+                            )
+                          : null,
+                      child: _PersonaCard(persona: persona, theme: theme),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const Gap(24),
+          ],
+        );
+
         return [
-          const Gap(16),
-          // Header row: back + LIVE badge
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () => context.pop(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white24, width: 1.5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.arrow_back, color: Colors.white, size: 16),
-                      const Gap(8),
-                      Text(
-                        'Back',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+          Expanded(
+            child: Responsive(
+              mobile: listContent,
+              desktop: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 380, child: listContent),
+                  const Gap(32),
+                  if (_selectedJourney != null)
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF131314),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.white10),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        child: Column(
+                          children: [
+                            ReactionDetailBody(journey: _selectedJourney!),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF3B1515),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF24968),
-                        shape: BoxShape.circle,
-                      ),
                     ),
-                    const Gap(6),
-                    Text(
-                      'LIVE',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFFF24968),
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
-            ],
-          ),
-          const Gap(32),
-          Text(
-            'Live reactions',
-            style: theme.textTheme.displayLarge?.copyWith(
-              fontSize: 40,
-              fontWeight: FontWeight.w900,
-              height: 1.0,
-              color: Colors.white,
             ),
           ),
-          const Gap(8),
-          Text(
-            '25 personas · 18 responded',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontSize: 14,
-              color: Colors.white54,
-            ),
-          ),
-          const Gap(24),
-          Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              itemCount: _personas.length,
-              separatorBuilder: (_, _) => const Gap(12),
-              itemBuilder: (context, index) {
-                final persona = _personas[index];
-                return _PersonaCard(persona: persona, theme: theme);
-              },
-            ),
-          ),
-          const Gap(24),
         ];
       },
     );
@@ -241,7 +271,10 @@ class _PersonaCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: persona.reactionColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
@@ -282,6 +315,7 @@ class PersonaReaction {
   final Color reactionColor;
   final String quote;
   final bool isMuted;
+  final AgentJourney journey;
 
   const PersonaReaction({
     required this.initial,
@@ -291,6 +325,7 @@ class PersonaReaction {
     required this.reaction,
     required this.reactionColor,
     required this.quote,
+    required this.journey,
     this.isMuted = false,
   });
 }

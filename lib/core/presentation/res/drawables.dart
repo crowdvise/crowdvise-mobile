@@ -8,12 +8,15 @@ const icArrowLeft = 'assets/icons/arrow-left.svg';
 const icArrowRight = 'assets/vectors/ic_forward_arrow.svg';
 const icArrowUp = 'assets/icons/arrow-up.svg';
 const icChevronRight = 'assets/icons/chevron.svg';
-// const icSearch = 'assets/svg/ic_search.svg';
 const icEye = 'assets/vectors/eye.svg';
 const icEyeSlash = 'assets/vectors/eye-slash.svg';
 const icProfile = 'assets/vectors/profile-circle.svg';
 const icEmail = 'assets/vectors/sms.svg';
 const icPassword = 'assets/vectors/key-square.svg';
+const icSession = 'assets/vectors/session.svg';
+const icHistory = 'assets/vectors/history.svg';
+const icSettings = 'assets/vectors/settings.svg';
+const search = 'assets/vectors/search-normal.svg';
 
 //Navbar icons
 

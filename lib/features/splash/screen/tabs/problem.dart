@@ -8,10 +8,11 @@ class ProblemScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const OldWayCard(
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const OldWayCard(
           icon: Icons.attach_money,
           color: Color(0xFFF24968),
           value: '\$15,000',
@@ -78,6 +79,7 @@ class ProblemScreen extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }

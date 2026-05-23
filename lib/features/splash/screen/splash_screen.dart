@@ -3,7 +3,7 @@ import 'package:crowdvise/core/presentation/utils/custom_state.dart';
 import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
 import 'package:crowdvise/core/presentation/utils/snack_bar_utils.dart';
 import 'package:crowdvise/features/auth/presentation/screens/login.dart';
-import 'package:crowdvise/features/session/presentation/screens/home.dart';
+import 'package:crowdvise/features/session/presentation/screens/dashboard.dart';
 import 'package:crowdvise/features/splash/manager/splash_provider.dart';
 import 'package:crowdvise/features/splash/screen/onboarding.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +50,7 @@ class _SplashScreenState extends CustomState<SplashScreen>
       } else if (event == 0) {
         context.pushNamedAndClear(LoginScreen.id);
       } else {
-        context.pushNamedAndClear(HomeScreen.id);
+        context.pushNamedAndClear(DashboardScreen.id);
       }
     });
     super.onStarted();

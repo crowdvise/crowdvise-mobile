@@ -1,6 +1,7 @@
 import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart';
 import 'package:crowdvise/core/domain/utils/utils.dart';
 import 'package:crowdvise/core/presentation/utils/custom_state.dart';
+import 'package:crowdvise/features/auth/presentation/screens/login.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:injectable/injectable.dart';
@@ -11,9 +12,13 @@ abstract class CoreModule {
   Dio dio() {
     final dio = Dio(
       BaseOptions(
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 30),
+        headers: {
+          "accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        connectTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(minutes: 15),
+        sendTimeout: const Duration(seconds: 60),
       ),
     );
     dio.interceptors.add(AwesomeDioInterceptor());
@@ -47,10 +52,10 @@ abstract class CoreModule {
       // value.remove(userRoleKey);
       // value.remove(savedIds);
 
-      // navigator.currentState?.pushAndRemoveUntil(
-      //   CupertinoPageRoute(builder: (context) => Container()),
-      //   (route) => false,
-      // );
+      navigator.currentState?.pushAndRemoveUntil(
+        CupertinoPageRoute(builder: (context) => LoginScreen()),
+        (route) => false,
+      );
     });
   }
 }

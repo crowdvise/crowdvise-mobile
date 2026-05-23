@@ -77,7 +77,7 @@ customToast(String message, [type = 1]) {
 
   return toastification.show(
     type: toastType,
-    style: ToastificationStyle.minimal,
+    style: ToastificationStyle.flatColored,
     autoCloseDuration: const Duration(seconds: 5),
     title: Text(title, style: TextStyle(color: neutral900)),
     description: Text(message, style: TextStyle(color: neutral600)),
@@ -125,7 +125,7 @@ customToast(String message, [type = 1]) {
     closeOnClick: false,
     pauseOnHover: true,
     dragToClose: true,
-    applyBlurEffect: true,
+    applyBlurEffect: false,
     // callbacks: ToastificationCallbacks(
     //   onTap: (toastItem) => print('Toast ${toastItem.id} tapped'),
     //   onCloseButtonTap:

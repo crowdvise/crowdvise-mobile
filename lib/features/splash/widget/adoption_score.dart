@@ -98,7 +98,7 @@ class ProgressBarWidget extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 90,
+          width: 110,
           child: Text(
             label,
             style: const TextStyle(

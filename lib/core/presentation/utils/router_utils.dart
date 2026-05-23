@@ -1,14 +1,18 @@
 import 'package:crowdvise/features/auth/presentation/screens/login.dart';
 import 'package:crowdvise/features/auth/presentation/screens/register.dart';
+import 'package:crowdvise/features/insights/presentation/screens/full_insights.dart';
 import 'package:crowdvise/features/insights/presentation/screens/insights.dart';
 import 'package:crowdvise/features/insights/presentation/screens/live_reactions.dart';
+import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
 import 'package:crowdvise/features/session/presentation/screens/assembling_panel.dart';
+import 'package:crowdvise/features/session/presentation/screens/dashboard.dart';
 import 'package:crowdvise/features/session/presentation/screens/home.dart';
 import 'package:crowdvise/features/session/presentation/screens/generate_journery.dart';
 import 'package:crowdvise/features/session/presentation/screens/review_journey.dart';
 import 'package:crowdvise/features/splash/screen/splash_screen.dart';
 import 'package:crowdvise/features/splash/screen/onboarding.dart';
 import 'package:crowdvise/features/splash/screen/welcome_screen.dart';
+import 'package:crowdvise/features/insights/presentation/screens/reaction_detail.dart';
 import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -58,7 +62,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case ReviewJourneyScreen.id:
       return _getPageRoute(
         routeName: settings.name,
-        viewToShow: const ReviewJourneyScreen(),
+        viewToShow: ReviewJourneyScreen(),
       );
     case AssemblingPanelScreen.id:
       return _getPageRoute(
@@ -69,55 +73,38 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case InsightsScreen.id:
       return _getPageRoute(
         routeName: settings.name,
-        viewToShow: const InsightsScreen(),
+        viewToShow: InsightsScreen(simulationId: settings.arguments as String),
       );
 
     case LiveReactionsScreen.id:
       return _getPageRoute(
         routeName: settings.name,
-        viewToShow: const LiveReactionsScreen(),
+        viewToShow: LiveReactionsScreen(
+          journeys: settings.arguments as List<AgentJourney>,
+        ),
       );
 
-    // case SetupProfileScreen.id:
-    //   return _getPageRoute(
-    //     routeName: settings.name,
-    //     viewToShow: const SetupProfileScreen(),
-    //   );
+    case ReactionDetailScreen.id:
+      return _getPageRoute(
+        routeName: settings.name,
+        viewToShow: ReactionDetailScreen(
+          journey: settings.arguments as AgentJourney,
+        ),
+      );
 
-    // case ForgotPasswordScreen.id:
-    //   return _getPageRoute(
-    //     routeName: settings.name,
-    //     viewToShow: const ForgotPasswordScreen(),
-    //   );
+    case FullInsightsScreen.id:
+      return _getPageRoute(
+        routeName: settings.name,
+        viewToShow: FullInsightsScreen(
+          insights: settings.arguments as List<String>,
+        ),
+      );
 
-    // case ResetPasswordScreen.id:
-    //   return _getPageRoute(
-    //     routeName: settings.name,
-    //     viewToShow: const ResetPasswordScreen(),
-    //   );
-
-    // case DashboardScreen.id:
-    //   return _getPageRoute(
-    //     routeName: settings.name,
-    //     viewToShow: const DashboardScreen(),
-    //   );
-    // case ClothingTypeScreen.id:
-    //   return _getPageRoute(
-    //     routeName: settings.name,
-    //     viewToShow: const ClothingTypeScreen(),
-    //   );
-
-    // case AddServiceScreen.id:
-    //   return _getPageRoute(
-    //     routeName: settings.name,
-    //     viewToShow: const AddServiceScreen(),
-    //   );
-
-    // case AddWorkScreen.id:
-    //   return _getPageRoute(
-    //     routeName: settings.name,
-    //     viewToShow: const AddWorkScreen(),
-    //   );
+    case DashboardScreen.id:
+      return _getPageRoute(
+        routeName: settings.name,
+        viewToShow: const DashboardScreen(),
+      );
 
     default:
       return MaterialPageRoute(

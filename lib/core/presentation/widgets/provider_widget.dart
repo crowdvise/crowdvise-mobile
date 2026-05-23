@@ -1,6 +1,6 @@
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
-import 'package:crowdvise/core/presentation/widgets/clickable.dart';
+// import 'package:crowdvise/core/presentation/widgets/clickable.dart';
 import 'package:flutter/material.dart';
 import 'package:crowdvise/core/presentation/manager/custom_provider.dart';
 import 'package:provider/provider.dart';
@@ -150,27 +150,40 @@ class ConsumerWidget<T extends CustomProvider> extends StatelessWidget {
       child: Consumer<T>(
         builder: (_, provider, __) {
           return Scaffold(
+            backgroundColor: nearBlack,
             resizeToAvoidBottomInset: resizeInsets,
-            backgroundColor: theme.colorScheme.surface,
             appBar: appBarTitle == null
                 ? null
                 : AppBar(
-                    backgroundColor: theme.colorScheme.surface,
+                    forceMaterialTransparency: true,
+                    backgroundColor: nearBlack,
                     elevation: 0,
                     centerTitle: true,
                     title: Text(
                       appBarTitle!,
-                      style: theme.textTheme.bodyLarge?.copyWith(fontSize: 16),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontSize: 16,
+                        color: white,
+                      ),
                     ),
                     leading: leading != null || leading == true
-                        ? Clickable(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Icon(
-                              Icons.keyboard_arrow_left_rounded,
-                              color: theme.colorScheme.onSurface,
-                              size: 24,
+                        ? GestureDetector(
+                            onTap: () => context.pop(),
+                            child: Container(
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.white24,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                                size: 16,
+                              ),
                             ),
                           )
                         : null,

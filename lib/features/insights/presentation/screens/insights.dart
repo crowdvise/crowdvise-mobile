@@ -1,331 +1,576 @@
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
+import 'package:crowdvise/core/presentation/utils/custom_state.dart';
 import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
+import 'package:crowdvise/core/presentation/utils/responsive.dart';
 import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
-import 'package:crowdvise/features/insights/presentation/manager/insights_provider.dart';
+import 'package:crowdvise/core/presentation/widgets/scrollable_widget.dart';
+import 'package:crowdvise/core/presentation/widgets/shimmers.dart';
+import 'package:crowdvise/features/history/presentation/manager/history_provider.dart';
+import 'package:crowdvise/features/insights/presentation/screens/full_insights.dart';
 import 'package:crowdvise/features/insights/presentation/screens/live_reactions.dart';
+import 'package:crowdvise/features/session/presentation/widgets/ai_generated_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 class InsightsScreen extends StatefulWidget {
   static const id = '/insights';
 
-  const InsightsScreen({super.key});
+  const InsightsScreen({super.key, required this.simulationId});
+  final String simulationId;
 
   @override
   State<InsightsScreen> createState() => _InsightsScreenState();
 }
 
-class _InsightsScreenState extends State<InsightsScreen> {
+class _InsightsScreenState extends CustomState<InsightsScreen> {
+  HistoryProvider? _provider;
+  @override
+  void onStarted() {
+    _provider?.gePastSimulations(simulationId: widget.simulationId);
+    super.onStarted();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ProviderWidget<InsightsProvider>(
-      provider: InsightsProvider(),
+    return ProviderWidget(
+      provider: HistoryProvider(),
+      appBarTitle: 'Simulation Results',
+      leading: true,
+      actions: const [LiveGeneratedChip(), Gap(8)],
       children: (provider, theme) {
-        return [
-          const Gap(16),
-          // Back button
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: () => context.pop(),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white24, width: 1.5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.arrow_back, color: Colors.white, size: 16),
-                    const Gap(8),
-                    Text(
-                      'Back',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const Gap(32),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Insights',
-                    style: theme.textTheme.displayLarge?.copyWith(
-                      fontSize: 48,
-                      fontWeight: FontWeight.w900,
-                      height: 1.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const Gap(8),
-                  Text(
-                    'Premium subscription tier · 25 personas',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 14,
-                      color: Colors.white54,
-                    ),
-                  ),
-                  const Gap(24),
+        _provider ??= provider;
+        final state = provider.state;
+        final simulation = state.histroyDetails;
 
-                  // Adoption Likelihood card
-                  _InsightCard(
-                    child: Row(
+        int converted = 0;
+        int dropped = 0;
+        int delayed = 0;
+
+        if (simulation != null) {
+          for (var journey in simulation.agentJourneys) {
+            final behavior = journey.reactions.isNotEmpty
+                ? journey.reactions.last.behaviour
+                : journey.finalOutcome;
+
+            switch (behavior.toLowerCase()) {
+              case 'converted':
+              case 'continuing':
+                converted++;
+                break;
+              case 'dropped':
+              case 'frustrated':
+                dropped++;
+                break;
+              case 'delaying':
+                delayed++;
+                break;
+            }
+          }
+        }
+
+        final total = simulation?.agentJourneys.length ?? 0;
+
+        return [
+          const Gap(32),
+          if (provider.loading) ...[
+            const Expanded(child: InsightsShimmer()),
+          ] else if (simulation == null) ...[
+            const Center(child: Text('No simulation results found')),
+          ] else ...[
+            ScrollableWidget(
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Circular gauge
-                        SizedBox(
-                          width: 80,
-                          height: 80,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              CircularProgressIndicator(
-                                value: 0.75,
-                                strokeWidth: 5,
-                                constraints: const BoxConstraints(
-                                  minWidth: 60,
-                                  minHeight: 60,
-                                ),
-                                backgroundColor: Colors.white10,
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  electricBlue,
-                                ),
-                                strokeCap: StrokeCap.round,
-                              ),
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
+                        Text(
+                          'Premium subscription tier · $total personas',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 14,
+                            color: Colors.white54,
+                          ),
+                        ),
+                        const Gap(24),
+
+                        Responsive.isDesktop(context) ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
                                 children: [
-                                  Text(
-                                    '68',
-                                    style: theme.textTheme.displayLarge
-                                        ?.copyWith(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.white,
-                                          height: 1.0,
+                                  // Adoption Likelihood card
+                                  _InsightCard(
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Circular gauge
+                                        SizedBox(
+                                          width: 80,
+                                          height: 80,
+                                          child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              CircularProgressIndicator(
+                                                value:
+                                                    simulation.readinessScore.toDouble() / 100,
+                                                strokeWidth: 5,
+                                                constraints: const BoxConstraints(
+                                                  minWidth: 60,
+                                                  minHeight: 60,
+                                                ),
+                                                backgroundColor: Colors.white10,
+                                                valueColor: AlwaysStoppedAnimation<Color>(
+                                                  simulation.readinessScore >= 70
+                                                      ? const Color(0xFF0FBC73)
+                                                      : simulation.readinessScore >= 40
+                                                      ? electricBlue
+                                                      : const Color(0xFFF24968),
+                                                ),
+                                                strokeCap: StrokeCap.round,
+                                              ),
+                                              Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    '${simulation.readinessScore}',
+                                                    style: theme.textTheme.displayLarge
+                                                        ?.copyWith(
+                                                          fontSize: 15,
+                                                          fontWeight: FontWeight.w900,
+                                                          color: Colors.white,
+                                                          height: 1.0,
+                                                        ),
+                                                  ),
+                                                  Text(
+                                                    '/100',
+                                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                                      fontSize: 11,
+                                                      color: Colors.white54,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
+                                        const Gap(24),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Adoption Likelihood',
+                                                style: theme.textTheme.displaySmall?.copyWith(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              const Gap(8),
+                                              Text(
+                                                simulation.topInsights.isNotEmpty
+                                                    ? simulation.topInsights.first
+                                                    : 'This product concept has a strong overall readiness score.',
+                                                style: theme.textTheme.bodyMedium?.copyWith(
+                                                  fontSize: 14,
+                                                  color: Colors.white70,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  Text(
-                                    '/100',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontSize: 11,
-                                      color: Colors.white54,
+                                  const Gap(16),
+
+                                  // Reaction Breakdown card
+                                  _InsightCard(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Reaction breakdown',
+                                          style: theme.textTheme.displaySmall?.copyWith(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const Gap(20),
+                                        _ReactionBar(
+                                          label: 'Converted',
+                                          value:
+                                              total > 0 ? converted / total : 0,
+                                          count: converted,
+                                          color: const Color(0xFF0FBC73),
+                                        ),
+                                        const Gap(16),
+                                        _ReactionBar(
+                                          label: 'Delayed',
+                                          value:
+                                              total > 0 ? delayed / total : 0,
+                                          count: delayed,
+                                          color: const Color(0xFFF3B70F),
+                                        ),
+                                        const Gap(16),
+                                        _ReactionBar(
+                                          label: 'Dropped',
+                                          value:
+                                              total > 0 ? dropped / total : 0,
+                                          count: dropped,
+                                          color: const Color(0xFFF24968),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                        const Gap(20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Adoption likelihood',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                            ),
+                            const Gap(16),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  // Top Insights card
+                                  _InsightCard(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Top insights',
+                                              style: theme.textTheme.displaySmall?.copyWith(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                context.pushNamed(FullInsightsScreen.id, args: simulation.topInsights);
+                                              },
+                                              child: const Icon(
+                                                Icons.arrow_forward,
+                                                color: Colors.white54,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Gap(16),
+                                        ...simulation.topInsights.map(
+                                          (insight) => Padding(
+                                            padding: const EdgeInsets.only(bottom: 12),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  '•',
+                                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                                    color: electricBlue,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const Gap(8),
+                                                Expanded(
+                                                  child: Text(
+                                                    insight,
+                                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                                      fontSize: 14,
+                                                      color: Colors.white70,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Gap(24),
+
+                                  // Live reactions button
+                                  GestureDetector(
+                                    onTap: () {
+                                      context.pushNamed(
+                                        LiveReactionsScreen.id,
+                                        args: simulation.agentJourneys,
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(20),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF131314),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(color: Colors.white10),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'See live reactions',
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.arrow_forward,
+                                            color: Colors.white54,
+                                            size: 18,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ) : Column(
+                          children: [
+                            // Adoption Likelihood card
+                            _InsightCard(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Circular gauge
+                                  SizedBox(
+                                    width: 80,
+                                    height: 80,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        CircularProgressIndicator(
+                                          value:
+                                              simulation.readinessScore.toDouble() / 100,
+                                          strokeWidth: 5,
+                                          constraints: const BoxConstraints(
+                                            minWidth: 60,
+                                            minHeight: 60,
+                                          ),
+                                          backgroundColor: Colors.white10,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            simulation.readinessScore >= 70
+                                                ? const Color(0xFF0FBC73)
+                                                : simulation.readinessScore >= 40
+                                                ? electricBlue
+                                                : const Color(0xFFF24968),
+                                          ),
+                                          strokeCap: StrokeCap.round,
+                                        ),
+                                        Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              '${simulation.readinessScore}',
+                                              style: theme.textTheme.displayLarge
+                                                  ?.copyWith(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w900,
+                                                    color: Colors.white,
+                                                    height: 1.0,
+                                                  ),
+                                            ),
+                                            Text(
+                                              '/100',
+                                              style: theme.textTheme.bodyMedium?.copyWith(
+                                                fontSize: 11,
+                                                color: Colors.white54,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Gap(24),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Adoption Likelihood',
+                                          style: theme.textTheme.displaySmall?.copyWith(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const Gap(8),
+                                        Text(
+                                          simulation.topInsights.isNotEmpty
+                                              ? simulation.topInsights.first
+                                              : 'This product concept has a strong overall readiness score.',
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            fontSize: 14,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Gap(16),
+
+                            // Reaction Breakdown card
+                            _InsightCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Reaction breakdown',
+                                    style: theme.textTheme.displaySmall?.copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const Gap(20),
+                                  _ReactionBar(
+                                    label: 'Converted',
+                                    value:
+                                        total > 0 ? converted / total : 0,
+                                    count: converted,
+                                    color: const Color(0xFF0FBC73),
+                                  ),
+                                  const Gap(16),
+                                  _ReactionBar(
+                                    label: 'Delayed',
+                                    value:
+                                        total > 0 ? delayed / total : 0,
+                                    count: delayed,
+                                    color: const Color(0xFFF3B70F),
+                                  ),
+                                  const Gap(16),
+                                  _ReactionBar(
+                                    label: 'Dropped',
+                                    value:
+                                        total > 0 ? dropped / total : 0,
+                                    count: dropped,
+                                    color: const Color(0xFFF24968),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Gap(16),
+
+                            // Top Insights card
+                            _InsightCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Top insights',
+                                        style: theme.textTheme.displaySmall?.copyWith(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          context.pushNamed(FullInsightsScreen.id, args: simulation.topInsights);
+                                        },
+                                        child: const Icon(
+                                          Icons.arrow_forward,
+                                          color: Colors.white54,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Gap(16),
+                                  ...simulation.topInsights.map(
+                                    (insight) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '•',
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: electricBlue,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const Gap(8),
+                                          Expanded(
+                                            child: Text(
+                                              insight,
+                                              style: theme.textTheme.bodyMedium?.copyWith(
+                                                fontSize: 14,
+                                                color: Colors.white70,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Gap(24),
+
+                            // Live reactions button
+                            GestureDetector(
+                              onTap: () {
+                                context.pushNamed(
+                                  LiveReactionsScreen.id,
+                                  args: simulation.agentJourneys,
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF131314),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: Colors.white10),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'See live reactions',
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.arrow_forward,
+                                      color: Colors.white54,
+                                      size: 18,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const Gap(6),
-                              Text(
-                                'Strong fit for teams. Price is the main barrier for individuals.',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontSize: 13,
-                                  color: Colors.white60,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Gap(16),
-
-                  // Reaction Breakdown card
-                  _InsightCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'REACTION BREAKDOWN',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white54,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        const Gap(20),
-                        _ReactionBar(
-                          label: 'Subscribed',
-                          value: 0.55,
-                          count: 7,
-                          color: const Color(0xFF0FBC73),
-                        ),
-                        const Gap(16),
-                        _ReactionBar(
-                          label: 'Excited',
-                          value: 0.60,
-                          count: 8,
-                          color: const Color(0xFF0FBC73),
-                        ),
-                        const Gap(16),
-                        _ReactionBar(
-                          label: 'Skeptical',
-                          value: 0.45,
-                          count: 6,
-                          color: const Color(0xFFF3B70F),
-                        ),
-                        const Gap(16),
-                        _ReactionBar(
-                          label: 'Confused',
-                          value: 0.15,
-                          count: 2,
-                          color: const Color(0xFF4285F4),
-                        ),
-                        const Gap(16),
-                        _ReactionBar(
-                          label: 'Dropped off',
-                          value: 0.15,
-                          count: 2,
-                          color: const Color(0xFFF24968),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Gap(16),
-
-                  // Top Objections card
-                  _InsightCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'TOP OBJECTIONS',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white54,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        const Gap(16),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: const [
-                            _TagChip(
-                              label: 'Price too high for solo users',
-                              isObjection: true,
-                            ),
-                            _TagChip(
-                              label: 'Unclear value prop',
-                              isObjection: true,
-                            ),
-                            _TagChip(
-                              label: 'Happy with current tool',
-                              isObjection: true,
                             ),
                           ],
                         ),
+                        const Gap(40),
                       ],
                     ),
                   ),
-                  const Gap(16),
-
-                  // Top Praise card
-                  _InsightCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'TOP PRAISE',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white54,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        const Gap(16),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: const [
-                            _TagChip(
-                              label: 'Solves a real pain point',
-                              isObjection: false,
-                            ),
-                            _TagChip(
-                              label: 'Strong ROI for teams',
-                              isObjection: false,
-                            ),
-                            _TagChip(
-                              label: 'Easy to understand',
-                              isObjection: false,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Gap(24),
-
-                  // Live reactions button
-                  GestureDetector(
-                    onTap: () {
-                      context.pushNamed(LiveReactionsScreen.id);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF131314),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white10),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'See live reactions',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const Icon(
-                            Icons.arrow_forward,
-                            color: Colors.white54,
-                            size: 18,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const Gap(40),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
+          ],
         ];
       },
     );
@@ -406,32 +651,27 @@ class _ReactionBar extends StatelessWidget {
 
 class _TagChip extends StatelessWidget {
   final String label;
-  final bool isObjection;
 
-  const _TagChip({required this.label, required this.isObjection});
+  const _TagChip({required this.label});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bgColor = isObjection
-        ? const Color(0xFF3B1515)
-        : const Color(0xFF0F2B1E);
-    final textColor = isObjection
-        ? const Color(0xFFF24968)
-        : const Color(0xFF0FBC73);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: const Color(0xFF5B7FFF).withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
         style: theme.textTheme.bodyMedium?.copyWith(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: textColor,
+          color: const Color(0xFF5B7FFF),
         ),
       ),
     );

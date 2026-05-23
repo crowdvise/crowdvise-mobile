@@ -3,6 +3,7 @@ import 'package:crowdvise/core/presentation/widgets/svg_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class Button extends StatelessWidget {
   const Button({
@@ -50,7 +51,10 @@ class Button extends StatelessWidget {
         ),
         onPressed: isEnabled ? onPressed : null,
         child: isLoading == true
-            ? CupertinoActivityIndicator(color: white)
+            ? LoadingAnimationWidget.dotsTriangle(
+                color: theme.colorScheme.surface,
+                size: 28,
+              )
             : Row(
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -117,7 +121,10 @@ class BorderButton extends StatelessWidget {
         ),
         onPressed: isEnabled ? onPressed : null,
         child: isLoading == true
-            ? CupertinoActivityIndicator(color: theme.colorScheme.surface)
+            ? LoadingAnimationWidget.waveDots(
+                color: theme.colorScheme.surface,
+                size: 28,
+              )
             : Row(
                 spacing: 8,
                 mainAxisAlignment: MainAxisAlignment.center,

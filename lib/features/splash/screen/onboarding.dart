@@ -100,7 +100,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         return Consumer<OnboardingProvider>(
           builder: (_, provider, _) {
             _provider ??= provider;
-            final state = provider.state;
             final isDesktop = Responsive.isDesktop(context);
 
             return Scaffold(

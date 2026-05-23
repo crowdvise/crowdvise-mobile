@@ -1,7 +1,6 @@
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/core/presentation/utils/responsive.dart';
 import 'package:crowdvise/core/presentation/widgets/bottom_nav_bar.dart';
-import 'package:crowdvise/core/presentation/widgets/svg_image.dart';
 import 'package:crowdvise/features/account/presentation/screens/account.dart';
 import 'package:crowdvise/features/history/presentation/screens/history.dart';
 import 'package:crowdvise/features/session/presentation/manager/dashboard_provider.dart';

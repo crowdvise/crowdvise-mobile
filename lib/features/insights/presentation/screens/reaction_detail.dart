@@ -1,4 +1,3 @@
-import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
 import 'package:crowdvise/core/presentation/widgets/scrollable_widget.dart';
 import 'package:crowdvise/features/insights/presentation/manager/insights_provider.dart';

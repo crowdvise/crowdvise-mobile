@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
+import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -75,21 +76,6 @@ class _EmailConfirmationDialogState extends State<EmailConfirmationDialog>
     _pulse.dispose();
     super.dispose();
   }
-
-  // // ── Resend with cooldown ──────────────────────────────────────────────────
-  // void _handleResend() {
-  //   if (_countdown > 0) return;
-  //   widget.onResend?.call();
-  //   setState(() => _countdown = _cooldownSeconds);
-  //   _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-  //     if (!mounted) {
-  //       t.cancel();
-  //       return;
-  //     }
-  //     setState(() => _countdown--);
-  //     if (_countdown <= 0) t.cancel();
-  //   });
-  // }
 
   // ── Copy email to clipboard ───────────────────────────────────────────────
   void _copyEmail() {
@@ -302,9 +288,12 @@ class _Content extends StatelessWidget {
 
           // Primary CTA — open email app
           ElevatedButton.icon(
-            onPressed: onOpenEmail,
-            icon: const Icon(Icons.open_in_new_rounded, size: 16),
-            label: const Text('Open email app'),
+            onPressed: () {
+              context.pop();
+              onOpenEmail?.call();
+            },
+            icon: const Icon(Icons.thumb_up_alt_outlined, size: 16),
+            label: const Text('Okay'),
             style: ElevatedButton.styleFrom(
               backgroundColor: _kAccent,
               foregroundColor: Colors.white,
@@ -324,42 +313,6 @@ class _Content extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-
-          // Secondary — resend with cooldown
-          OutlinedButton(
-            onPressed: onResend,
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 52), // 👈 same fix
-              foregroundColor: _kText,
-              disabledForegroundColor: _kMuted,
-              side: BorderSide(color: _kBorder),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              textStyle: const TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-            child: Text('Close'),
-          ),
-          const SizedBox(height: 18),
-
-          // // Tertiary — change email
-          // GestureDetector(
-          //   onTap: onChangeEmail,
-          //   child: const Text(
-          //     'Wrong email? Change it',
-          //     style: TextStyle(
-          //       fontFamily: 'PlusJakartaSans',
-          //       fontSize: 13,
-          //       color: _kMuted,
-          //       decoration: TextDecoration.underline,
-          //       decorationColor: _kMuted,
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );

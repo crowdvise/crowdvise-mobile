@@ -6,7 +6,6 @@ import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
 import 'package:crowdvise/core/presentation/widgets/scrollable_widget.dart';
 import 'package:crowdvise/core/presentation/widgets/shimmers.dart';
 import 'package:crowdvise/features/history/presentation/manager/history_provider.dart';
-import 'package:crowdvise/features/insights/presentation/screens/full_insights.dart';
 import 'package:crowdvise/features/insights/presentation/screens/live_reactions.dart';
 import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
 import 'package:crowdvise/features/session/presentation/widgets/ai_generated_chip.dart';

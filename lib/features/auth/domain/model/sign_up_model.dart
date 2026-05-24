@@ -60,10 +60,10 @@ class Identity {
 }
 
 class Data {
-  String email;
-  bool emailVerified;
-  bool phoneVerified;
-  String sub;
+  String? email;
+  bool? emailVerified;
+  bool? phoneVerified;
+  String? sub;
 
   Data({
     required this.email,

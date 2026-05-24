@@ -13,6 +13,8 @@ class AuthState {
   String? passwordError;
   String confirmPassword = '';
   String? confirmPasswordError;
+  String industry = '';
+  String? industryError;
 
   SignUpPayload toSignUpPayload() {
     return SignUpPayload(
@@ -20,6 +22,7 @@ class AuthState {
       lastName: lastName,
       email: email,
       password: confirmPassword,
+      industry: industry,
     );
   }
 

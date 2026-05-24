@@ -15,7 +15,6 @@ import 'package:crowdvise/features/auth/presentation/widgets/email_confirmation_
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const id = '/register';
@@ -36,13 +35,11 @@ class _RegisterScreenState extends CustomState<RegisterScreen> {
           EmailConfirmationDialog.show(
             context,
             email: event.email,
-            onOpenEmail: () => launchUrl(
-              Uri.parse('mailto:'),
-              mode: LaunchMode.externalApplication,
-            ),
+            onOpenEmail: () {
+              context.pushNamedAndClear(LoginScreen.id);
+            },
             onLogin: () {
               context.pop();
-              context.pushNamedAndClear(LoginScreen.id);
             },
           );
         }
@@ -126,6 +123,28 @@ class _RegisterScreenState extends CustomState<RegisterScreen> {
             ),
             const Gap(24),
             Text(
+              "INDUSTRY",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: Colors.white54,
+                letterSpacing: 1.5,
+              ),
+            ),
+            const Gap(8),
+            InputField(
+              hint: 'Industry',
+              prefix: briefcase,
+              value: state.industry,
+              error: state.industryError,
+              inputType: TextInputType.text,
+              onChange: (value) {
+                provider.setIndustry(value);
+              },
+            ),
+            const Gap(24),
+
+            Text(
               "EMAIL",
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 12,
@@ -145,6 +164,7 @@ class _RegisterScreenState extends CustomState<RegisterScreen> {
                 provider.setEmail(value);
               },
             ),
+
             const Gap(24),
             Text(
               "PASSWORD",
@@ -251,9 +271,7 @@ class _RegisterScreenState extends CustomState<RegisterScreen> {
             child: Responsive(
               mobile: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: [formContent],
-                ),
+                child: Column(children: [formContent]),
               ),
               desktop: Row(
                 children: [
@@ -265,10 +283,7 @@ class _RegisterScreenState extends CustomState<RegisterScreen> {
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFF2A2D3A),
-                            Color(0xFF131314),
-                          ],
+                          colors: [Color(0xFF2A2D3A), Color(0xFF131314)],
                         ),
                         border: Border.all(color: Colors.white10),
                       ),

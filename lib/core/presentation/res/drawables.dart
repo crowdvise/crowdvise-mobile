@@ -20,6 +20,7 @@ const search = 'assets/vectors/search-normal.svg';
 const calendar = 'assets/vectors/calendar.svg';
 const user = 'assets/vectors/user.svg';
 const home = 'assets/vectors/home.svg';
+const briefcase = 'assets/vectors/briefcase.svg';
 
 //Navbar icons
 

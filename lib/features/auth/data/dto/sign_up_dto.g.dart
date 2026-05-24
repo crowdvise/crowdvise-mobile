@@ -80,10 +80,10 @@ Map<String, dynamic> _$IdentityDtoToJson(IdentityDto instance) =>
     };
 
 DataDto _$DataDtoFromJson(Map<String, dynamic> json) => DataDto(
-  email: json['email'] as String,
-  emailVerified: json['email_verified'] as bool,
-  phoneVerified: json['phone_verified'] as bool,
-  sub: json['sub'] as String,
+  email: json['email'] as String?,
+  emailVerified: json['email_verified'] as bool?,
+  phoneVerified: json['phone_verified'] as bool?,
+  sub: json['sub'] as String?,
 );
 
 Map<String, dynamic> _$DataDtoToJson(DataDto instance) => <String, dynamic>{

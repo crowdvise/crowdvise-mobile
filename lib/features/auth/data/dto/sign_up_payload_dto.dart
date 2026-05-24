@@ -12,12 +12,15 @@ class SignUpPayloadDto {
     String email;
     @JsonKey(name: "password")
     String password;
+    @JsonKey(name: "industry")
+    String industry;
 
     SignUpPayloadDto({
         required this.firstName,
         required this.lastName,
         required this.email,
         required this.password,
+        required this.industry,
     });
 
     factory SignUpPayloadDto.fromJson(Map<String, dynamic> json) => _$SignUpPayloadDtoFromJson(json);

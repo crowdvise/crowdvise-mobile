@@ -12,6 +12,7 @@ SignUpPayloadDto _$SignUpPayloadDtoFromJson(Map<String, dynamic> json) =>
       lastName: json['last_name'] as String,
       email: json['email'] as String,
       password: json['password'] as String,
+      industry: json['industry'] as String,
     );
 
 Map<String, dynamic> _$SignUpPayloadDtoToJson(SignUpPayloadDto instance) =>
@@ -20,4 +21,5 @@ Map<String, dynamic> _$SignUpPayloadDtoToJson(SignUpPayloadDto instance) =>
       'last_name': instance.lastName,
       'email': instance.email,
       'password': instance.password,
+      'industry': instance.industry,
     };

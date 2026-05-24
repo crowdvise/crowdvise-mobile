@@ -50,17 +50,18 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<ApiResult<SignUpModel>> register({
     required SignUpPayload payload,
   }) async {
-    try {
-      final param = SignUpPayloadDto(
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        email: payload.email,
-        password: payload.password,
-      );
-      final result = await api.register(apiKey: apiKey, payload: param);
-      return ApiResult.success(result.toDto());
-    } catch (e) {
-      return ApiResult.failure(e);
-    }
+    // try {
+    final param = SignUpPayloadDto(
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      email: payload.email,
+      password: payload.password,
+      industry: payload.industry,
+    );
+    final result = await api.register(apiKey: apiKey, payload: param);
+    return ApiResult.success(result.toDto());
+    // } catch (e) {
+    //   return ApiResult.failure(e);
+    // }
   }
 }

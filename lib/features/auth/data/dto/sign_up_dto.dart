@@ -155,13 +155,13 @@ class IdentityDto {
 @JsonSerializable()
 class DataDto {
   @JsonKey(name: "email")
-  String email;
+  String? email;
   @JsonKey(name: "email_verified")
-  bool emailVerified;
+  bool? emailVerified;
   @JsonKey(name: "phone_verified")
-  bool phoneVerified;
+  bool? phoneVerified;
   @JsonKey(name: "sub")
-  String sub;
+  String? sub;
 
   DataDto({
     required this.email,

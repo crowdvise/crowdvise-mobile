@@ -33,6 +33,11 @@ class AuthProvider extends CustomProvider {
     state.passwordError = password.validatePassword();
     _validateInfo();
   }
+  void setIndustry(String industry) {
+    state.industry = industry;
+    state.industryError = industry.validateField();
+    _validateInfo();
+  }
 
   void setConfirmPassword(String confirmPassword) {
     state.confirmPassword = confirmPassword;
@@ -47,6 +52,7 @@ class AuthProvider extends CustomProvider {
       state.firstName.validateField() == null,
       state.lastName.validateField() == null,
       state.email.validateField() == null,
+      state.industry.validateField() == null,
       state.password.validateField() == null,
       state.confirmPassword.validateRePassword(state.password) == null,
     ].validate();

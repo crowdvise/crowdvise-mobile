@@ -648,32 +648,3 @@ class _ReactionBar extends StatelessWidget {
     );
   }
 }
-
-// class _TagChip extends StatelessWidget {
-//   final String label;
-
-//   const _TagChip({required this.label});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final theme = Theme.of(context);
-
-//     return Container(
-//       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-//       decoration: BoxDecoration(
-//         color: const Color(0xFF5B7FFF).withValues(alpha: 0.12),
-//         borderRadius: BorderRadius.circular(8),
-//       ),
-//       child: Text(
-//         label,
-//         maxLines: 2,
-//         overflow: TextOverflow.ellipsis,
-//         style: theme.textTheme.bodyMedium?.copyWith(
-//           fontSize: 13,
-//           fontWeight: FontWeight.w600,
-//           color: const Color(0xFF5B7FFF),
-//         ),
-//       ),
-//     );
-//   }
-// }

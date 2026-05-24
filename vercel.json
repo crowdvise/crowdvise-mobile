@@ -1,5 +1,27 @@
 {
-  "github": {
-    "enabled": false
-  }
+  "buildCommand": "flutter/bin/flutter build web --release --base-href /",
+  "outputDirectory": "build/web",
+  "installCommand": "if [ ! -d \"flutter\" ]; then git clone https://github.com/flutter/flutter.git --depth 1 --branch stable; fi && flutter/bin/flutter config --enable-web && flutter/bin/flutter pub get",
+  "framework": null,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

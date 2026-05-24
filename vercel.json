@@ -1,7 +1,7 @@
 {
   "buildCommand": "flutter/bin/flutter build web --release --base-href /",
   "outputDirectory": "build/web",
-  "installCommand": "if [ ! -d \"flutter\" ]; then git clone https://github.com/flutter/flutter.git --depth 1 --branch stable; fi && flutter/bin/flutter config --enable-web && flutter/bin/flutter pub get",
+  "installCommand": "if [ ! -d \"flutter\" ]; then git clone https://github.com/flutter/flutter.git --depth 1 --branch stable; fi && flutter/bin/flutter config --enable-web && flutter/bin/flutter pub get && echo \"SUPABASE_API_KEY=$SUPABASE_API_KEY\" > assets/config/.env",
   "framework": null,
   "headers": [
     {

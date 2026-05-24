@@ -328,38 +328,17 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    'Top insights',
-                                                    style: theme
-                                                        .textTheme
-                                                        .displaySmall
-                                                        ?.copyWith(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w800,
-                                                          color: Colors.white,
-                                                        ),
-                                                  ),
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      context.pushNamed(
-                                                        FullInsightsScreen.id,
-                                                        args: simulation
-                                                            .topInsights,
-                                                      );
-                                                    },
-                                                    child: const Icon(
-                                                      Icons.arrow_forward,
-                                                      color: Colors.white54,
-                                                      size: 20,
+                                              Text(
+                                                'Top insights',
+                                                style: theme
+                                                    .textTheme
+                                                    .displaySmall
+                                                    ?.copyWith(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      color: Colors.white,
                                                     ),
-                                                  ),
-                                                ],
                                               ),
                                               const Gap(16),
                                               ...simulation.topInsights.map(
@@ -626,36 +605,16 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Top insights',
-                                              style: theme
-                                                  .textTheme
-                                                  .displaySmall
-                                                  ?.copyWith(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w800,
-                                                    color: Colors.white,
-                                                  ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: () {
-                                                context.pushNamed(
-                                                  FullInsightsScreen.id,
-                                                  args: simulation.topInsights,
-                                                );
-                                              },
-                                              child: const Icon(
-                                                Icons.arrow_forward,
-                                                color: Colors.white54,
-                                                size: 20,
+                                        Text(
+                                          'Top insights',
+                                          style: theme.textTheme.displaySmall
+                                              ?.copyWith(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
                                               ),
-                                            ),
-                                          ],
                                         ),
+
                                         const Gap(16),
                                         ...simulation.topInsights.map(
                                           (insight) => Padding(

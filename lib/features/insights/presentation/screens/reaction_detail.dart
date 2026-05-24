@@ -19,9 +19,7 @@ class ReactionDetailScreen extends StatelessWidget {
       appBarTitle: 'Reaction Details',
       provider: InsightsProvider(),
       children: (provider, theme) {
-        return [
-          ReactionDetailBody(journey: journey),
-        ];
+        return [ReactionDetailBody(journey: journey)];
       },
     );
   }
@@ -131,21 +129,13 @@ class ReactionDetailBody extends StatelessWidget {
                     agent.ocean.conscientiousness,
                     theme,
                   ),
-                  _TraitBadge(
-                    'Extraversion',
-                    agent.ocean.extraversion,
-                    theme,
-                  ),
+                  _TraitBadge('Extraversion', agent.ocean.extraversion, theme),
                   _TraitBadge(
                     'Agreeableness',
                     agent.ocean.agreeableness,
                     theme,
                   ),
-                  _TraitBadge(
-                    'Neuroticism',
-                    agent.ocean.neuroticism,
-                    theme,
-                  ),
+                  _TraitBadge('Neuroticism', agent.ocean.neuroticism, theme),
                 ],
               ),
             ],
@@ -167,7 +157,9 @@ class ReactionDetailBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Text(
               'No reactions recorded.',
-              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white54),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.white54,
+              ),
             ),
           )
         else
@@ -228,7 +220,8 @@ class ReactionDetailBody extends StatelessWidget {
                         ),
                       ),
                       if (reaction.frictionTriggered != null &&
-                          reaction.frictionTriggered!.isNotEmpty) ...[
+                          reaction.frictionTriggered!.isNotEmpty &&
+                          reaction.frictionTriggered != 'null') ...[
                         const Gap(12),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,9 +242,12 @@ class ReactionDetailBody extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ] else ...[
+                        const SizedBox.shrink(),
                       ],
                       if (reaction.whatWouldChangeThis != null &&
-                          reaction.whatWouldChangeThis!.isNotEmpty) ...[
+                          reaction.whatWouldChangeThis!.isNotEmpty &&
+                          reaction.whatWouldChangeThis != 'null') ...[
                         const Gap(8),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,16 +276,17 @@ class ReactionDetailBody extends StatelessWidget {
               );
             }).toList(),
           ),
-          const Gap(40),
-        ],
+        const Gap(40),
+      ],
     );
   }
 
   Color _getBehaviorColor(String behavior) {
     switch (behavior.toLowerCase()) {
       case 'converted':
-      case 'continuing':
         return const Color(0xFF0FBC73);
+      case 'continuing':
+        return const Color(0xFF8B5CF6);
       case 'dropped':
       case 'frustrated':
         return const Color(0xFFF24968);
@@ -302,7 +299,6 @@ class ReactionDetailBody extends StatelessWidget {
     }
   }
 }
-
 
 class _TraitBadge extends StatelessWidget {
   final String label;

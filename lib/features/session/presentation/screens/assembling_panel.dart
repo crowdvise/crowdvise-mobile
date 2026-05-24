@@ -15,7 +15,8 @@ import 'package:gap/gap.dart';
 class AssemblingPanelScreen extends StatefulWidget {
   static const id = '/assembling_panel';
 
-  const AssemblingPanelScreen({super.key});
+  const AssemblingPanelScreen({super.key, required this.productDescription});
+  final String productDescription;
 
   @override
   State<AssemblingPanelScreen> createState() => _AssemblingPanelScreenState();
@@ -46,9 +47,12 @@ class _AssemblingPanelScreenState extends CustomState<AssemblingPanelScreen> {
         showError(event);
         context.pop();
       } else if (event is SimulationModel) {
-        _statusTimer?.cancel();
-        context.pushReplacement(
-          InsightsScreen(simulationId: event.simulationId),
+        context.pushReplacementInner(
+          InsightsScreen(
+            simulationId: event.simulationId,
+            productDescription: widget.productDescription,
+            model: event,
+          ),
         );
       }
     });

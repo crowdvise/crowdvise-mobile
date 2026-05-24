@@ -9,6 +9,9 @@ import 'package:crowdvise/features/session/presentation/widgets/modern_sidebar.d
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+/// Global key exposed so any screen can push/pop within the dashboard shell.
+final dashboardNavigatorKey = GlobalKey<NavigatorState>();
+
 class DashboardScreen extends StatefulWidget {
   static const String id = '/dashboard';
   const DashboardScreen({super.key});
@@ -19,6 +22,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   DashboardProvider? _provider;
+
   final List<Widget> _screens = [
     const HomeScreen(),
     const HistoryScreen(),
@@ -43,16 +47,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ModernSidebar(
                     selectedIndex: state.selectedIndex,
                     onDestinationSelected: (index) {
+                      // When switching tabs, reset the inner navigator stack
+                      dashboardNavigatorKey.currentState
+                          ?.popUntil((route) => route.isFirst);
                       provider.updateIndex(index);
                     },
                   ),
                 if (isDesktop)
                   const VerticalDivider(
-                    // thickness: .5,
                     width: .02,
                     color: grey900,
                   ),
-                Expanded(child: _screens.elementAt(state.selectedIndex)),
+                Expanded(
+                  child: isDesktop
+                      // Desktop: nested navigator keeps sidebar visible
+                      ? Navigator(
+                          key: dashboardNavigatorKey,
+                          onGenerateRoute: (_) => MaterialPageRoute(
+                            builder: (_) =>
+                                _screens.elementAt(state.selectedIndex),
+                          ),
+                        )
+                      // Mobile: just show the screen directly
+                      : _screens.elementAt(state.selectedIndex),
+                ),
               ],
             ),
             bottomNavigationBar: isDesktop

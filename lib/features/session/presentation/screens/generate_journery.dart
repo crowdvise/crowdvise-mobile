@@ -29,7 +29,7 @@ class _GenerateJourneyScreenState extends CustomState<GenerateJourneyScreen> {
       if (event is String) {
         showError(event);
       } else if (event is GeneratedJourneyModel) {
-        context.push(ReviewJourneyScreen());
+        context.pushInner(ReviewJourneyScreen());
         // showSuccess("Journey generated successfully");
       }
     });
@@ -52,7 +52,7 @@ class _GenerateJourneyScreenState extends CustomState<GenerateJourneyScreen> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => context.popInner(),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -98,7 +98,7 @@ class _GenerateJourneyScreenState extends CustomState<GenerateJourneyScreen> {
               InputField(
                 hint: 'Describe your product or feature',
                 maxLines: 6,
-                maxLength: 500,
+                // maxLength: 500,
                 value: state.productDescription,
                 error: state.productDescriptionError,
                 onChange: (val) {
@@ -125,7 +125,7 @@ class _GenerateJourneyScreenState extends CustomState<GenerateJourneyScreen> {
                   provider.setTestScenario(val);
                 },
               ),
-                    
+
               const Gap(24),
               Text(
                 'TARGET CUSTOMER',

@@ -24,7 +24,7 @@ class SimulationDto {
   @JsonKey(name: "overall_dropout_rate")
   double overallDropoutRate;
   @JsonKey(name: "overall_delayed_rate")
-  int overallDelayedRate;
+  double overallDelayedRate;
   @JsonKey(name: "agent_journeys")
   List<AgentJourneyDto> agentJourneys;
   @JsonKey(name: "stage_insights")

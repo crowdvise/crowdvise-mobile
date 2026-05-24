@@ -149,7 +149,7 @@ class _ReviewJourneyScreenState extends CustomState<ReviewJourneyScreen> {
                         title: 'Run Simulation',
                         onPressed: () {
                           provider.runSimulation(stages: state.journeyStages);
-                          context.push(AssemblingPanelScreen());
+                          context.pushInner(AssemblingPanelScreen(productDescription: state.productDescription));
                         },
                       ),
                       const Gap(40),

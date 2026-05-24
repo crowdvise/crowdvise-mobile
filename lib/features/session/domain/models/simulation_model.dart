@@ -4,7 +4,7 @@ class SimulationModel {
     String simulationId;
     double overallConversionRate;
     double overallDropoutRate;
-    int overallDelayedRate;
+    double overallDelayedRate;
     List<AgentJourney> agentJourneys;
     List<StageInsight> stageInsights;
     List<String> topInsights;

@@ -12,8 +12,13 @@ import 'package:gap/gap.dart';
 class LiveReactionsScreen extends StatefulWidget {
   static const id = '/live_reactions';
 
-  const LiveReactionsScreen({super.key, required this.journeys});
+  const LiveReactionsScreen({
+    super.key,
+    required this.journeys,
+    this.isLive = false,
+  });
   final List<AgentJourney> journeys;
+  final bool isLive;
 
   @override
   State<LiveReactionsScreen> createState() => _LiveReactionsScreenState();
@@ -28,9 +33,6 @@ class _LiveReactionsScreenState extends State<LiveReactionsScreen> {
   void initState() {
     super.initState();
     _personas = _generatePersonasFromJourneys();
-    if (_personas.isNotEmpty) {
-      _selectedJourney = _personas.first.journey;
-    }
   }
 
   List<PersonaReaction> _generatePersonasFromJourneys() {
@@ -72,7 +74,7 @@ class _LiveReactionsScreenState extends State<LiveReactionsScreen> {
           reactionText = 'Delaying';
           break;
         case 'continuing':
-          reactionColor = const Color(0xFF0FBC73);
+          reactionColor = const Color(0xFF8B5CF6);
           reactionText = 'Continuing';
           break;
         default:
@@ -108,18 +110,14 @@ class _LiveReactionsScreenState extends State<LiveReactionsScreen> {
   Widget build(BuildContext context) {
     return ProviderWidget(
       provider: InsightsProvider(),
-      appBarTitle: 'Live Reactions',
+      appBarTitle: widget.isLive ? 'Live Reactions' : 'Synthetic Reactions',
       leading: true,
-      actions: [LiveGeneratedChip(), const Gap(8)],
+      actions: widget.isLive ? [LiveGeneratedChip(), const Gap(8)] : [],
       children: (provider, theme) {
         // Calculate counts
         final totalPersonas = _personas.length;
         final respondedCount = _personas
-            .where(
-              (p) =>
-                  p.reaction.toLowerCase() != 'continuing' &&
-                  p.reaction.toLowerCase() != 'dropped off',
-            )
+            .where((p) => p.journey.reactions.isNotEmpty)
             .length;
 
         final listContent = Column(
@@ -151,9 +149,8 @@ class _LiveReactionsScreenState extends State<LiveReactionsScreen> {
                           _selectedJourney = persona.journey;
                         });
                       } else {
-                        context.pushNamed(
-                          ReactionDetailScreen.id,
-                          args: persona.journey,
+                        context.pushInner(
+                          ReactionDetailScreen(journey: persona.journey),
                         );
                       }
                     },
@@ -184,7 +181,7 @@ class _LiveReactionsScreenState extends State<LiveReactionsScreen> {
                 children: [
                   SizedBox(width: 380, child: listContent),
                   const Gap(32),
-                  if (_selectedJourney != null)
+                  if (_selectedJourney != null) ...[
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -203,6 +200,16 @@ class _LiveReactionsScreenState extends State<LiveReactionsScreen> {
                         ),
                       ),
                     ),
+                  ] else ...[
+                    const Expanded(
+                      child: Center(
+                        child: Text(
+                          'Select a persona to view details',
+                          style: TextStyle(color: Colors.white54),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

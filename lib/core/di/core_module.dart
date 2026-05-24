@@ -18,7 +18,7 @@ abstract class CoreModule {
         },
         connectTimeout: const Duration(seconds: 60),
         receiveTimeout: const Duration(minutes: 15),
-        sendTimeout: const Duration(seconds: 60),
+        // sendTimeout: const Duration(seconds: 60),
       ),
     );
     dio.interceptors.add(AwesomeDioInterceptor());

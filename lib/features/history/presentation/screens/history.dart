@@ -12,7 +12,6 @@ import 'package:crowdvise/features/history/presentation/widgets/history_card.dar
 import 'package:crowdvise/features/insights/presentation/screens/insights.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
@@ -251,22 +250,33 @@ class _HistoryScreenState extends CustomState<HistoryScreen> {
                                       Responsive.isDesktop(context)
                                           ? GridView.builder(
                                               shrinkWrap: true,
-                                              physics: const NeverScrollableScrollPhysics(),
-                                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: 2,
-                                                crossAxisSpacing: 16,
-                                                mainAxisSpacing: 16,
-                                                mainAxisExtent: 300,
-                                              ),
-                                              itemCount: groupedRuns[groupKey]!.length,
+                                              physics:
+                                                  const NeverScrollableScrollPhysics(),
+                                              gridDelegate:
+                                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                                    crossAxisCount: 2,
+                                                    crossAxisSpacing: 16,
+                                                    mainAxisSpacing: 16,
+                                                    mainAxisExtent: 300,
+                                                  ),
+                                              itemCount:
+                                                  groupedRuns[groupKey]!.length,
                                               itemBuilder: (context, index) {
-                                                final run = groupedRuns[groupKey]![index];
+                                                final run =
+                                                    groupedRuns[groupKey]![index];
+                                                final product = run
+                                                    .productDescription
+                                                    .split('.')[0]
+                                                    .trim();
                                                 return HistoryCard(
                                                   run: run,
                                                   onTap: () {
-                                                    context.pushNamed(
-                                                      InsightsScreen.id,
-                                                      args: run.id,
+                                                    context.pushInner(
+                                                      InsightsScreen(
+                                                        simulationId: run.id,
+                                                        productDescription:
+                                                            product,
+                                                      ),
                                                     );
                                                   },
                                                 );
@@ -274,18 +284,30 @@ class _HistoryScreenState extends CustomState<HistoryScreen> {
                                             )
                                           : ListView.separated(
                                               shrinkWrap: true,
-                                              physics: const NeverScrollableScrollPhysics(),
+                                              physics:
+                                                  const NeverScrollableScrollPhysics(),
                                               padding: EdgeInsets.zero,
-                                              itemCount: groupedRuns[groupKey]!.length,
-                                              separatorBuilder: (_, _) => const Gap(12),
+                                              itemCount:
+                                                  groupedRuns[groupKey]!.length,
+                                              separatorBuilder: (_, _) =>
+                                                  const Gap(12),
                                               itemBuilder: (context, index) {
-                                                final run = groupedRuns[groupKey]![index];
+                                                final run =
+                                                    groupedRuns[groupKey]![index];
+                                                final product = run
+                                                    .productDescription
+                                                    .split('.')[0]
+                                                    .trim();
+
                                                 return HistoryCard(
                                                   run: run,
                                                   onTap: () {
-                                                    context.pushNamed(
-                                                      InsightsScreen.id,
-                                                      args: run.id,
+                                                    context.pushInner(
+                                                      InsightsScreen(
+                                                        simulationId: run.id,
+                                                        productDescription:
+                                                            product,
+                                                      ),
                                                     );
                                                   },
                                                 );

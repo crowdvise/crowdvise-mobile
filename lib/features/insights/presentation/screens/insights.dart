@@ -8,6 +8,7 @@ import 'package:crowdvise/core/presentation/widgets/shimmers.dart';
 import 'package:crowdvise/features/history/presentation/manager/history_provider.dart';
 import 'package:crowdvise/features/insights/presentation/screens/full_insights.dart';
 import 'package:crowdvise/features/insights/presentation/screens/live_reactions.dart';
+import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
 import 'package:crowdvise/features/session/presentation/widgets/ai_generated_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -15,8 +16,15 @@ import 'package:gap/gap.dart';
 class InsightsScreen extends StatefulWidget {
   static const id = '/insights';
 
-  const InsightsScreen({super.key, required this.simulationId});
+  const InsightsScreen({
+    super.key,
+    required this.simulationId,
+    this.model,
+    this.productDescription,
+  });
   final String simulationId;
+  final SimulationModel? model;
+  final String? productDescription;
 
   @override
   State<InsightsScreen> createState() => _InsightsScreenState();
@@ -26,8 +34,51 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
   HistoryProvider? _provider;
   @override
   void onStarted() {
-    _provider?.gePastSimulations(simulationId: widget.simulationId);
+    if (widget.model == null) {
+      _provider?.gePastSimulations(simulationId: widget.simulationId);
+    }
     super.onStarted();
+  }
+
+  String _formatStageName(String name) {
+    return name
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return word;
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
+  }
+
+  String _getAdoptionDescription(SimulationModel? simulation) {
+    if (simulation == null) return '';
+    final score = simulation.readinessScore;
+
+    if (score >= 70) {
+      final rate = (simulation.overallConversionRate * 100).round();
+      return '$rate% conversion rate success';
+    } else if (score >= 40) {
+      if (simulation.stageInsights.isNotEmpty) {
+        final highestDelay = simulation.stageInsights.reduce(
+          (a, b) => a.delayRate > b.delayRate ? a : b,
+        );
+        final rate = (highestDelay.delayRate * 100).round();
+        return '$rate% delay rate at ${_formatStageName(highestDelay.stageName)} stage';
+      }
+    } else {
+      if (simulation.stageInsights.isNotEmpty) {
+        final highestDropout = simulation.stageInsights.reduce(
+          (a, b) => a.dropoutRate > b.dropoutRate ? a : b,
+        );
+        final rate = (highestDropout.dropoutRate * 100).round();
+        return '$rate% hard dropout at ${_formatStageName(highestDropout.stageName)} stage';
+      }
+    }
+
+    return simulation.topInsights.isNotEmpty
+        ? simulation.topInsights.first
+        : 'This product concept has a strong overall readiness score.';
   }
 
   @override
@@ -36,39 +87,25 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
       provider: HistoryProvider(),
       appBarTitle: 'Simulation Results',
       leading: true,
-      actions: const [LiveGeneratedChip(), Gap(8)],
+      actions: widget.model != null ? const [LiveGeneratedChip(), Gap(8)] : [],
       children: (provider, theme) {
         _provider ??= provider;
         final state = provider.state;
-        final simulation = state.histroyDetails;
+        final simulation = widget.model ?? state.histroyDetails;
 
         int converted = 0;
         int dropped = 0;
         int delayed = 0;
 
-        if (simulation != null) {
-          for (var journey in simulation.agentJourneys) {
-            final behavior = journey.reactions.isNotEmpty
-                ? journey.reactions.last.behaviour
-                : journey.finalOutcome;
+        final total = simulation?.agentJourneys.length ?? 0;
 
-            switch (behavior.toLowerCase()) {
-              case 'converted':
-              case 'continuing':
-                converted++;
-                break;
-              case 'dropped':
-              case 'frustrated':
-                dropped++;
-                break;
-              case 'delaying':
-                delayed++;
-                break;
-            }
-          }
+        if (simulation != null && total > 0) {
+          converted = (simulation.overallConversionRate * total).round();
+          dropped = (simulation.overallDropoutRate * total).round();
+          delayed = (simulation.overallDelayedRate * total).round();
         }
 
-        final total = simulation?.agentJourneys.length ?? 0;
+        final isLive = widget.model == null ? false : true;
 
         return [
           const Gap(32),
@@ -86,7 +123,15 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Premium subscription tier · $total personas',
+                          widget.productDescription ?? '',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 16,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        if (widget.productDescription != null) const Gap(8),
+                        Text(
+                          '$total personas',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontSize: 14,
                             color: Colors.white54,
@@ -94,16 +139,337 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                         ),
                         const Gap(24),
 
-                        Responsive.isDesktop(context) ? Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
+                        Responsive.isDesktop(context)
+                            ? Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        // Adoption Likelihood card
+                                        _InsightCard(
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              // Circular gauge
+                                              SizedBox(
+                                                width: 80,
+                                                height: 80,
+                                                child: Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    CircularProgressIndicator(
+                                                      value:
+                                                          simulation
+                                                              .readinessScore
+                                                              .toDouble() /
+                                                          100,
+                                                      strokeWidth: 5,
+                                                      constraints:
+                                                          const BoxConstraints(
+                                                            minWidth: 60,
+                                                            minHeight: 60,
+                                                          ),
+                                                      backgroundColor:
+                                                          Colors.white10,
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                            Color
+                                                          >(
+                                                            simulation.readinessScore >=
+                                                                    70
+                                                                ? const Color(
+                                                                    0xFF0FBC73,
+                                                                  )
+                                                                : simulation
+                                                                          .readinessScore >=
+                                                                      40
+                                                                ? electricBlue
+                                                                : const Color(
+                                                                    0xFFF24968,
+                                                                  ),
+                                                          ),
+                                                      strokeCap:
+                                                          StrokeCap.round,
+                                                    ),
+                                                    Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Text(
+                                                          '${simulation.readinessScore}',
+                                                          style: theme
+                                                              .textTheme
+                                                              .displayLarge
+                                                              ?.copyWith(
+                                                                fontSize: 15,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w900,
+                                                                color: Colors
+                                                                    .white,
+                                                                height: 1.0,
+                                                              ),
+                                                        ),
+                                                        Text(
+                                                          '/100',
+                                                          style: theme
+                                                              .textTheme
+                                                              .bodyMedium
+                                                              ?.copyWith(
+                                                                fontSize: 11,
+                                                                color: Colors
+                                                                    .white54,
+                                                              ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const Gap(24),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Adoption Likelihood',
+                                                      style: theme
+                                                          .textTheme
+                                                          .displaySmall
+                                                          ?.copyWith(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            color: Colors.white,
+                                                          ),
+                                                    ),
+                                                    const Gap(8),
+                                                    Text(
+                                                      _getAdoptionDescription(
+                                                        simulation,
+                                                      ),
+                                                      style: theme
+                                                          .textTheme
+                                                          .bodyMedium
+                                                          ?.copyWith(
+                                                            fontSize: 14,
+                                                            color:
+                                                                Colors.white70,
+                                                          ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Gap(16),
+                                        // Reaction Breakdown card
+                                        _InsightCard(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Reaction breakdown',
+                                                style: theme
+                                                    .textTheme
+                                                    .displaySmall
+                                                    ?.copyWith(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      color: Colors.white,
+                                                    ),
+                                              ),
+                                              const Gap(20),
+                                              _ReactionBar(
+                                                label: 'Converted',
+                                                value: total > 0
+                                                    ? converted / total
+                                                    : 0,
+                                                count: converted,
+                                                color: const Color(0xFF0FBC73),
+                                              ),
+                                              const Gap(16),
+                                              _ReactionBar(
+                                                label: 'Delayed',
+                                                value: total > 0
+                                                    ? delayed / total
+                                                    : 0,
+                                                count: delayed,
+                                                color: const Color(0xFFF3B70F),
+                                              ),
+                                              const Gap(16),
+                                              _ReactionBar(
+                                                label: 'Dropped',
+                                                value: total > 0
+                                                    ? dropped / total
+                                                    : 0,
+                                                count: dropped,
+                                                color: const Color(0xFFF24968),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const Gap(16),
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        // Top Insights card
+                                        _InsightCard(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Top insights',
+                                                    style: theme
+                                                        .textTheme
+                                                        .displaySmall
+                                                        ?.copyWith(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w800,
+                                                          color: Colors.white,
+                                                        ),
+                                                  ),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      context.pushNamed(
+                                                        FullInsightsScreen.id,
+                                                        args: simulation
+                                                            .topInsights,
+                                                      );
+                                                    },
+                                                    child: const Icon(
+                                                      Icons.arrow_forward,
+                                                      color: Colors.white54,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const Gap(16),
+                                              ...simulation.topInsights.map(
+                                                (insight) => Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 12,
+                                                      ),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        '•',
+                                                        style: theme
+                                                            .textTheme
+                                                            .bodyMedium
+                                                            ?.copyWith(
+                                                              color:
+                                                                  electricBlue,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                      ),
+                                                      const Gap(8),
+                                                      Expanded(
+                                                        child: Text(
+                                                          insight,
+                                                          style: theme
+                                                              .textTheme
+                                                              .bodyMedium
+                                                              ?.copyWith(
+                                                                fontSize: 14,
+                                                                color: Colors
+                                                                    .white70,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Gap(24),
+
+                                        // Live reactions button
+                                        GestureDetector(
+                                          onTap: () {
+                                            context.pushInner(
+                                              LiveReactionsScreen(
+                                                journeys:
+                                                    simulation.agentJourneys,
+                                                isLive: isLive,
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(20),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF131314),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              border: Border.all(
+                                                color: Colors.white10,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  !isLive
+                                                      ? 'See past reactions'
+                                                      : 'See live reactions',
+                                                  style: theme
+                                                      .textTheme
+                                                      .bodyMedium
+                                                      ?.copyWith(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color: Colors.white,
+                                                      ),
+                                                ),
+                                                const Icon(
+                                                  Icons.arrow_forward,
+                                                  color: Colors.white54,
+                                                  size: 18,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Column(
                                 children: [
                                   // Adoption Likelihood card
                                   _InsightCard(
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         // Circular gauge
                                         SizedBox(
@@ -114,20 +480,33 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                             children: [
                                               CircularProgressIndicator(
                                                 value:
-                                                    simulation.readinessScore.toDouble() / 100,
+                                                    simulation.readinessScore
+                                                        .toDouble() /
+                                                    100,
                                                 strokeWidth: 5,
-                                                constraints: const BoxConstraints(
-                                                  minWidth: 60,
-                                                  minHeight: 60,
-                                                ),
+                                                constraints:
+                                                    const BoxConstraints(
+                                                      minWidth: 60,
+                                                      minHeight: 60,
+                                                    ),
                                                 backgroundColor: Colors.white10,
-                                                valueColor: AlwaysStoppedAnimation<Color>(
-                                                  simulation.readinessScore >= 70
-                                                      ? const Color(0xFF0FBC73)
-                                                      : simulation.readinessScore >= 40
-                                                      ? electricBlue
-                                                      : const Color(0xFFF24968),
-                                                ),
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(
+                                                      simulation.readinessScore >=
+                                                              70
+                                                          ? const Color(
+                                                              0xFF0FBC73,
+                                                            )
+                                                          : simulation
+                                                                    .readinessScore >=
+                                                                40
+                                                          ? electricBlue
+                                                          : const Color(
+                                                              0xFFF24968,
+                                                            ),
+                                                    ),
                                                 strokeCap: StrokeCap.round,
                                               ),
                                               Column(
@@ -135,20 +514,26 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                                 children: [
                                                   Text(
                                                     '${simulation.readinessScore}',
-                                                    style: theme.textTheme.displayLarge
+                                                    style: theme
+                                                        .textTheme
+                                                        .displayLarge
                                                         ?.copyWith(
                                                           fontSize: 15,
-                                                          fontWeight: FontWeight.w900,
+                                                          fontWeight:
+                                                              FontWeight.w900,
                                                           color: Colors.white,
                                                           height: 1.0,
                                                         ),
                                                   ),
                                                   Text(
                                                     '/100',
-                                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                                      fontSize: 11,
-                                                      color: Colors.white54,
-                                                    ),
+                                                    style: theme
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.copyWith(
+                                                          fontSize: 11,
+                                                          color: Colors.white54,
+                                                        ),
                                                   ),
                                                 ],
                                               ),
@@ -158,25 +543,33 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                         const Gap(24),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 'Adoption Likelihood',
-                                                style: theme.textTheme.displaySmall?.copyWith(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: Colors.white,
-                                                ),
+                                                style: theme
+                                                    .textTheme
+                                                    .displaySmall
+                                                    ?.copyWith(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      color: Colors.white,
+                                                    ),
                                               ),
                                               const Gap(8),
                                               Text(
-                                                simulation.topInsights.isNotEmpty
-                                                    ? simulation.topInsights.first
-                                                    : 'This product concept has a strong overall readiness score.',
-                                                style: theme.textTheme.bodyMedium?.copyWith(
-                                                  fontSize: 14,
-                                                  color: Colors.white70,
+                                                _getAdoptionDescription(
+                                                  simulation,
                                                 ),
+                                                style: theme
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      fontSize: 14,
+                                                      color: Colors.white70,
+                                                    ),
                                               ),
                                             ],
                                           ),
@@ -189,69 +582,71 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                   // Reaction Breakdown card
                                   _InsightCard(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Reaction breakdown',
-                                          style: theme.textTheme.displaySmall?.copyWith(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w800,
-                                            color: Colors.white,
-                                          ),
+                                          style: theme.textTheme.displaySmall
+                                              ?.copyWith(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.white,
+                                              ),
                                         ),
                                         const Gap(20),
                                         _ReactionBar(
                                           label: 'Converted',
-                                          value:
-                                              total > 0 ? converted / total : 0,
+                                          value: converted / total,
                                           count: converted,
                                           color: const Color(0xFF0FBC73),
                                         ),
                                         const Gap(16),
                                         _ReactionBar(
                                           label: 'Delayed',
-                                          value:
-                                              total > 0 ? delayed / total : 0,
+                                          value: delayed / total,
                                           count: delayed,
                                           color: const Color(0xFFF3B70F),
                                         ),
                                         const Gap(16),
                                         _ReactionBar(
                                           label: 'Dropped',
-                                          value:
-                                              total > 0 ? dropped / total : 0,
+                                          value: dropped / total,
                                           count: dropped,
                                           color: const Color(0xFFF24968),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                            const Gap(16),
-                            Expanded(
-                              child: Column(
-                                children: [
+                                  const Gap(16),
+
                                   // Top Insights card
                                   _InsightCard(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
                                               'Top insights',
-                                              style: theme.textTheme.displaySmall?.copyWith(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w800,
-                                                color: Colors.white,
-                                              ),
+                                              style: theme
+                                                  .textTheme
+                                                  .displaySmall
+                                                  ?.copyWith(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: Colors.white,
+                                                  ),
                                             ),
                                             GestureDetector(
                                               onTap: () {
-                                                context.pushNamed(FullInsightsScreen.id, args: simulation.topInsights);
+                                                context.pushNamed(
+                                                  FullInsightsScreen.id,
+                                                  args: simulation.topInsights,
+                                                );
                                               },
                                               child: const Icon(
                                                 Icons.arrow_forward,
@@ -264,26 +659,35 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                         const Gap(16),
                                         ...simulation.topInsights.map(
                                           (insight) => Padding(
-                                            padding: const EdgeInsets.only(bottom: 12),
+                                            padding: const EdgeInsets.only(
+                                              bottom: 12,
+                                            ),
                                             child: Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   '•',
-                                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                                    color: electricBlue,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                                  style: theme
+                                                      .textTheme
+                                                      .bodyMedium
+                                                      ?.copyWith(
+                                                        color: electricBlue,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                 ),
                                                 const Gap(8),
                                                 Expanded(
                                                   child: Text(
                                                     insight,
-                                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                                      fontSize: 14,
-                                                      color: Colors.white70,
-                                                    ),
+                                                    style: theme
+                                                        .textTheme
+                                                        .bodyMedium
+                                                        ?.copyWith(
+                                                          fontSize: 14,
+                                                          color: Colors.white70,
+                                                        ),
                                                   ),
                                                 ),
                                               ],
@@ -298,9 +702,11 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                   // Live reactions button
                                   GestureDetector(
                                     onTap: () {
-                                      context.pushNamed(
-                                        LiveReactionsScreen.id,
-                                        args: simulation.agentJourneys,
+                                      context.push(
+                                        LiveReactionsScreen(
+                                          journeys: simulation.agentJourneys,
+                                          isLive: isLive,
+                                        ),
                                       );
                                     },
                                     child: Container(
@@ -308,18 +714,24 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                       decoration: BoxDecoration(
                                         color: const Color(0xFF131314),
                                         borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(color: Colors.white10),
+                                        border: Border.all(
+                                          color: Colors.white10,
+                                        ),
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            'See live reactions',
-                                            style: theme.textTheme.bodyMedium?.copyWith(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white,
-                                            ),
+                                            !isLive
+                                                ? 'See past reactions'
+                                                : 'See live reactions',
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.white,
+                                                ),
                                           ),
                                           const Icon(
                                             Icons.arrow_forward,
@@ -332,237 +744,6 @@ class _InsightsScreenState extends CustomState<InsightsScreen> {
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ) : Column(
-                          children: [
-                            // Adoption Likelihood card
-                            _InsightCard(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Circular gauge
-                                  SizedBox(
-                                    width: 80,
-                                    height: 80,
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        CircularProgressIndicator(
-                                          value:
-                                              simulation.readinessScore.toDouble() / 100,
-                                          strokeWidth: 5,
-                                          constraints: const BoxConstraints(
-                                            minWidth: 60,
-                                            minHeight: 60,
-                                          ),
-                                          backgroundColor: Colors.white10,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            simulation.readinessScore >= 70
-                                                ? const Color(0xFF0FBC73)
-                                                : simulation.readinessScore >= 40
-                                                ? electricBlue
-                                                : const Color(0xFFF24968),
-                                          ),
-                                          strokeCap: StrokeCap.round,
-                                        ),
-                                        Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              '${simulation.readinessScore}',
-                                              style: theme.textTheme.displayLarge
-                                                  ?.copyWith(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w900,
-                                                    color: Colors.white,
-                                                    height: 1.0,
-                                                  ),
-                                            ),
-                                            Text(
-                                              '/100',
-                                              style: theme.textTheme.bodyMedium?.copyWith(
-                                                fontSize: 11,
-                                                color: Colors.white54,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const Gap(24),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Adoption Likelihood',
-                                          style: theme.textTheme.displaySmall?.copyWith(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w800,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        const Gap(8),
-                                        Text(
-                                          simulation.topInsights.isNotEmpty
-                                              ? simulation.topInsights.first
-                                              : 'This product concept has a strong overall readiness score.',
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            fontSize: 14,
-                                            color: Colors.white70,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Gap(16),
-
-                            // Reaction Breakdown card
-                            _InsightCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Reaction breakdown',
-                                    style: theme.textTheme.displaySmall?.copyWith(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const Gap(20),
-                                  _ReactionBar(
-                                    label: 'Converted',
-                                    value:
-                                        total > 0 ? converted / total : 0,
-                                    count: converted,
-                                    color: const Color(0xFF0FBC73),
-                                  ),
-                                  const Gap(16),
-                                  _ReactionBar(
-                                    label: 'Delayed',
-                                    value:
-                                        total > 0 ? delayed / total : 0,
-                                    count: delayed,
-                                    color: const Color(0xFFF3B70F),
-                                  ),
-                                  const Gap(16),
-                                  _ReactionBar(
-                                    label: 'Dropped',
-                                    value:
-                                        total > 0 ? dropped / total : 0,
-                                    count: dropped,
-                                    color: const Color(0xFFF24968),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Gap(16),
-
-                            // Top Insights card
-                            _InsightCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Top insights',
-                                        style: theme.textTheme.displaySmall?.copyWith(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w800,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          context.pushNamed(FullInsightsScreen.id, args: simulation.topInsights);
-                                        },
-                                        child: const Icon(
-                                          Icons.arrow_forward,
-                                          color: Colors.white54,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const Gap(16),
-                                  ...simulation.topInsights.map(
-                                    (insight) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 12),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '•',
-                                            style: theme.textTheme.bodyMedium?.copyWith(
-                                              color: electricBlue,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const Gap(8),
-                                          Expanded(
-                                            child: Text(
-                                              insight,
-                                              style: theme.textTheme.bodyMedium?.copyWith(
-                                                fontSize: 14,
-                                                color: Colors.white70,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Gap(24),
-
-                            // Live reactions button
-                            GestureDetector(
-                              onTap: () {
-                                context.pushNamed(
-                                  LiveReactionsScreen.id,
-                                  args: simulation.agentJourneys,
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF131314),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.white10),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'See live reactions',
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_forward,
-                                      color: Colors.white54,
-                                      size: 18,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                         const Gap(40),
                       ],
                     ),

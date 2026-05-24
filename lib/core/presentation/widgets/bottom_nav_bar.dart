@@ -14,7 +14,7 @@ class BottomNavBarItem {
   String text;
 
   static List<BottomNavBarItem> get items => [
-    BottomNavBarItem(text: 'Session', icon: icSession),
+    BottomNavBarItem(text: 'Home', icon: home),
 
     BottomNavBarItem(text: 'History', icon: icHistory),
 

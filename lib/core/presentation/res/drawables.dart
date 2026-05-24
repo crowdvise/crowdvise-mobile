@@ -17,6 +17,9 @@ const icSession = 'assets/vectors/session.svg';
 const icHistory = 'assets/vectors/history.svg';
 const icSettings = 'assets/vectors/settings.svg';
 const search = 'assets/vectors/search-normal.svg';
+const calendar = 'assets/vectors/calendar.svg';
+const user = 'assets/vectors/user.svg';
+const home = 'assets/vectors/home.svg';
 
 //Navbar icons
 

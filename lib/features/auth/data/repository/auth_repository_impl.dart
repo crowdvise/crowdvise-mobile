@@ -19,7 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final api = getIt.get<AuthApiService>();
   final _pref = getIt.getAsync<SharedPreferences>();
-  final apiKey = dotenv.env['SUPABASE_API_KEY']!;
+  final apiKey = dotenv.env['SUPABASE_API_KEY'] ?? '';
 
   @override
   Future<ApiResult<LoginModel>> login({required LoginPayload payload}) async {

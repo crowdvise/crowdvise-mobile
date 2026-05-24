@@ -12,7 +12,7 @@ SimulationDto _$SimulationDtoFromJson(Map<String, dynamic> json) =>
       overallConversionRate: (json['overall_conversion_rate'] as num)
           .toDouble(),
       overallDropoutRate: (json['overall_dropout_rate'] as num).toDouble(),
-      overallDelayedRate: (json['overall_delayed_rate'] as num).toInt(),
+      overallDelayedRate: (json['overall_delayed_rate'] as num).toDouble(),
       agentJourneys: (json['agent_journeys'] as List<dynamic>)
           .map((e) => AgentJourneyDto.fromJson(e as Map<String, dynamic>))
           .toList(),

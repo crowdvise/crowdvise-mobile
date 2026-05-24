@@ -67,7 +67,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case AssemblingPanelScreen.id:
       return _getPageRoute(
         routeName: settings.name,
-        viewToShow: const AssemblingPanelScreen(),
+        viewToShow: const AssemblingPanelScreen(productDescription: ''),
       );
 
     case InsightsScreen.id:

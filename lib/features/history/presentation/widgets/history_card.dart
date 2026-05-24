@@ -1,3 +1,5 @@
+import 'package:crowdvise/core/presentation/res/drawables.dart';
+import 'package:crowdvise/core/presentation/widgets/svg_image.dart';
 import 'package:crowdvise/features/history/domain/models/history_model.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -19,19 +21,6 @@ class HistoryCard extends StatelessWidget {
     if (score >= 70) return 'Ready';
     if (score >= 40) return 'Needs work';
     return 'Not ready';
-  }
-
-  int _getStageCount(RunModel r) {
-    final hash = r.id.hashCode.abs();
-    return 3 + (hash % 3);
-  }
-
-  String _getDuration(RunModel r) {
-    final hash = r.id.hashCode.abs();
-    final totalSeconds = 60 + (hash % 500);
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
-    return '${minutes}m ${seconds.toString().padLeft(2, '0')}s';
   }
 
   String _formatDate(String dateStr) {
@@ -81,15 +70,11 @@ class HistoryCard extends StatelessWidget {
                 Expanded(
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.calendar_today_outlined,
-                        size: 14,
-                        color: Colors.white54,
-                      ),
+                      SvgImage(asset: calendar, color: Colors.white54, height: 14,),
                       const Gap(6),
                       Expanded(
                         child: Text(
-                          '${_formatDate(run.createdAt)}  •  ${_getDuration(run)}',
+                          _formatDate(run.createdAt),
                           style: const TextStyle(
                             color: Colors.white54,
                             fontSize: 12,
@@ -174,17 +159,8 @@ class HistoryCard extends StatelessWidget {
             const Gap(12),
 
             // Chips: Agents & Stages
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                _buildInfoChip(Icons.people_outline, '${run.panelSize} Agents'),
-                _buildInfoChip(
-                  Icons.layers_outlined,
-                  '${_getStageCount(run)} Stages',
-                ),
-              ],
-            ),
+            _buildInfoChip(Icons.person_outline, '${run.panelSize} Agents'),
+
             const Gap(24),
 
             // Bottom Section: Progress Bar & Legend
@@ -258,7 +234,7 @@ class HistoryCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: Colors.white70),
+          SvgImage(asset: user, color: Colors.white70, height: 14,),
           const Gap(6),
           Text(
             label,

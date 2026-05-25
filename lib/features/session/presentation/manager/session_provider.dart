@@ -11,7 +11,7 @@ import 'package:crowdvise/features/session/presentation/manager/session_state.da
 import 'package:flutter/material.dart';
 
 class SessionProvider extends CustomProvider {
-  final state = SessionState();
+  var state = SessionState();
   final _repo = getIt.get<SessionRepository>();
 
   void selectPanelSize(PanelSize panelSize) {
@@ -19,32 +19,37 @@ class SessionProvider extends CustomProvider {
     notifyListeners();
   }
 
+  void reset() {
+    state = SessionState();
+    notifyListeners();
+  }
+
   void setProductDescription(String desc) {
-    state.productDescription = desc.trim();
+    state.productDescription = desc;
     state.productDescriptionError = desc.validateField();
     _validateInfo();
   }
 
   void setTestScenario(String scenario) {
-    state.testScenario = scenario.trim();
+    state.testScenario = scenario;
     state.testScenarioError = scenario.validateField();
     _validateInfo();
   }
 
   void setTargetSegment(String segment) {
-    state.targetSegment = segment.trim();
+    state.targetSegment = segment;
     state.targetSegmentError = segment.validateField();
     _validateInfo();
   }
 
   void setJourneyName(String name) {
-    state.journeyName = name.trim();
+    state.journeyName = name;
     state.journeyNameError = name.validateField();
     _validateInfo();
   }
 
   void setJourneyDescription(String description) {
-    state.journeyDescription = description.trim();
+    state.journeyDescription = description;
     state.journeyDescriptionError = description.validateField();
     _validateInfo();
   }

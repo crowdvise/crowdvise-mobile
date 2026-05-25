@@ -50,12 +50,28 @@ abstract class TextFieldState<T extends TextFieldParent> extends CustomState<T> 
     });
   }
   @override
-  Widget build(BuildContext context) {
-    if (widget.value != controller.text && widget.value != null) {
-      if (mounted) {
-        controller.text = widget.value ?? '';
-      }
+  void didUpdateWidget(T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value && widget.value != null && widget.value != controller.text) {
+      final newValue = widget.value!;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && controller.text != newValue) {
+          final cursorPosition = controller.selection;
+          controller.text = newValue;
+          // Retain cursor position if possible
+          if (cursorPosition.baseOffset <= newValue.length) {
+            controller.selection = cursorPosition.copyWith(
+              baseOffset: cursorPosition.baseOffset.clamp(0, newValue.length),
+              extentOffset: cursorPosition.extentOffset.clamp(0, newValue.length),
+            );
+          }
+        }
+      });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return const Placeholder();
   }
 }

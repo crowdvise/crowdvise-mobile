@@ -1,4 +1,5 @@
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
+import 'package:crowdvise/core/presentation/utils/custom_state.dart';
 import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
 import 'package:crowdvise/core/presentation/widgets/button.dart';
 import 'package:crowdvise/core/presentation/widgets/input_field.dart';
@@ -17,12 +18,26 @@ class JourneyModal extends StatefulWidget {
   State<JourneyModal> createState() => _JourneyModalState();
 }
 
-class _JourneyModalState extends State<JourneyModal> {
+class _JourneyModalState extends CustomState<JourneyModal> {
+  SessionProvider? _provider;
+  @override
+  void onStarted() {
+    if (widget.stageModel != null) {
+      _provider?.setJourneyName(widget.stageModel!.name);
+      _provider?.setJourneyDescription(widget.stageModel!.description);
+    } else {
+      _provider?.setJourneyName('');
+      _provider?.setJourneyDescription('');
+    }
+    super.onStarted();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Consumer<SessionProvider>(
       builder: (_, provider, _) {
+        _provider ??= provider;
         final state = provider.state;
         return IntrinsicHeight(
           child: Container(
@@ -68,7 +83,7 @@ class _JourneyModalState extends State<JourneyModal> {
                 InputField(
                   hint: 'Give your stage a short title',
                   maxLines: 3,
-                  value: widget.stageModel?.name ?? state.journeyName,
+                  value: state.journeyName,
                   onChange: (val) {
                     provider.setJourneyName(val);
                   },
@@ -87,9 +102,7 @@ class _JourneyModalState extends State<JourneyModal> {
                 InputField(
                   hint: 'Add context for the expert',
                   maxLines: 4,
-                  value:
-                      widget.stageModel?.description ??
-                      state.journeyDescription,
+                  value: state.journeyDescription,
                   onChange: (val) {
                     provider.setJourneyDescription(val);
                   },

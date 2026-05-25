@@ -1,3 +1,6 @@
+import 'package:provider/provider.dart';
+import 'package:crowdvise/features/history/presentation/manager/history_provider.dart';
+import 'package:crowdvise/features/session/presentation/manager/session_provider.dart';
 import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart';
 import 'package:crowdvise/core/domain/utils/utils.dart';
 import 'package:crowdvise/core/presentation/utils/custom_state.dart';
@@ -51,6 +54,16 @@ abstract class CoreModule {
       value.remove(currentEmail);
       // value.remove(userRoleKey);
       // value.remove(savedIds);
+
+      final context = navigator.currentState?.context;
+      if (context != null) {
+        try {
+          context.read<SessionProvider>().reset();
+          context.read<HistoryProvider>().reset();
+        } catch (e) {
+          // Ignore if provider is not found
+        }
+      }
 
       navigator.currentState?.pushAndRemoveUntil(
         CupertinoPageRoute(builder: (context) => LoginScreen()),

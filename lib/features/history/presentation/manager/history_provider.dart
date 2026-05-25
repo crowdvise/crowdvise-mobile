@@ -8,7 +8,12 @@ import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
 
 class HistoryProvider extends CustomProvider {
   final _repo = getIt.get<HistoryRepository>();
-  final state = HistoryState();
+  var state = HistoryState();
+
+  void reset() {
+    state = HistoryState();
+    notifyListeners();
+  }
 
   void fetchHistory() {
     onLoad();

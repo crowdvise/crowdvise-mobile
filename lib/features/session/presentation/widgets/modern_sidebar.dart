@@ -2,6 +2,13 @@ import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/core/presentation/widgets/bottom_nav_bar.dart';
 import 'package:crowdvise/core/presentation/widgets/clickable.dart';
 import 'package:crowdvise/core/presentation/widgets/svg_image.dart';
+import 'package:crowdvise/core/di/core_module_container.dart';
+import 'package:crowdvise/core/domain/utils/utils.dart';
+import 'package:crowdvise/features/auth/presentation/screens/login.dart';
+import 'package:crowdvise/features/session/presentation/manager/session_provider.dart';
+import 'package:crowdvise/features/history/presentation/manager/history_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -300,8 +307,23 @@ class _ModernSidebarState extends State<ModernSidebar> {
                 // ),
                 // Logout
                 Clickable(
-                  onPressed: () {
-                    // Trigger logout logic
+                  onPressed: () async {
+                    final pref = await getIt.getAsync<SharedPreferences>();
+                    await pref.remove(tokenKey);
+                    await pref.remove(user);
+                    await pref.remove(currentEmail);
+
+                    if (context.mounted) {
+                      try {
+                        context.read<SessionProvider>().reset();
+                        context.read<HistoryProvider>().reset();
+                      } catch (_) {}
+                      
+                      Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+                        LoginScreen.id,
+                        (route) => false,
+                      );
+                    }
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(

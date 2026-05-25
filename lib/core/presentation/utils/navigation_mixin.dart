@@ -1,4 +1,7 @@
 import 'package:crowdvise/features/session/presentation/screens/dashboard.dart';
+import 'package:crowdvise/features/session/presentation/screens/home.dart';
+import 'package:crowdvise/features/session/presentation/manager/dashboard_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
 extension Navigation on BuildContext {
@@ -94,6 +97,30 @@ extension Navigation on BuildContext {
       inner.pushNamed(route, arguments: args);
     } else {
       Navigator.of(this).pushNamed(route, arguments: args);
+    }
+  }
+
+  /// Safely clears the entire navigation stack and returns to the Dashboard.
+  /// Works consistently across Mobile (root stack) and Web (nested navigator)
+  /// by forcing the action onto the root navigator.
+  void goHome() {
+    final inner = dashboardNavigatorKey.currentState;
+    if (inner != null) {
+      // On Web/Desktop, force the inner navigator stack to clear and show HomeScreen
+      try {
+        Provider.of<DashboardProvider>(inner.context, listen: false).updateIndex(0);
+      } catch (_) {}
+      
+      inner.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    } else {
+      // On Mobile, replace the root stack
+      Navigator.of(this, rootNavigator: true).pushNamedAndRemoveUntil(
+        DashboardScreen.id,
+        (Route<dynamic> route) => false,
+      );
     }
   }
 }

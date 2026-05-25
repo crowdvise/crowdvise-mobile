@@ -1,11 +1,14 @@
+import 'package:crowdvise/core/presentation/res/drawables.dart';
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
 import 'package:crowdvise/core/presentation/utils/responsive.dart';
 import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
+import 'package:crowdvise/core/presentation/widgets/svg_image.dart';
 import 'package:crowdvise/features/insights/presentation/manager/insights_provider.dart';
 import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
 import 'package:crowdvise/features/insights/presentation/screens/reaction_detail.dart';
 import 'package:crowdvise/features/session/presentation/widgets/ai_generated_chip.dart';
+import 'package:crowdvise/features/session/presentation/screens/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -112,7 +115,14 @@ class _LiveReactionsScreenState extends State<LiveReactionsScreen> {
       provider: InsightsProvider(),
       appBarTitle: widget.isLive ? 'Live Reactions' : 'Synthetic Reactions',
       leading: true,
-      actions: widget.isLive ? [LiveGeneratedChip(), const Gap(8)] : [],
+      actions: [
+        IconButton(
+          onPressed: () => context.goHome(),
+          icon: SvgImage(asset: home, color: white),
+          tooltip: 'Back to Home',
+        ),
+        const Gap(8),
+      ],
       children: (provider, theme) {
         // Calculate counts
         final totalPersonas = _personas.length;
@@ -124,12 +134,18 @@ class _LiveReactionsScreenState extends State<LiveReactionsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Gap(16),
-            Text(
-              '$totalPersonas personas · $respondedCount responded',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontSize: 14,
-                color: Colors.white54,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '$totalPersonas personas · $respondedCount responded',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: 14,
+                    color: Colors.white54,
+                  ),
+                ),
+                if (widget.isLive) ...[LiveGeneratedChip()],
+              ],
             ),
             const Gap(24),
             Expanded(

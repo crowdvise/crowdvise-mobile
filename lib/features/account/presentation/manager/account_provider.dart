@@ -44,5 +44,6 @@ class AccountProvider extends CustomProvider {
     final pref = await getIt.getAsync<SharedPreferences>();
     await pref.remove(tokenKey);
     await pref.remove(user);
+    await pref.remove(currentEmail);
   }
 }

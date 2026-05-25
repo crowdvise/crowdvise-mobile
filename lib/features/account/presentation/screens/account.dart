@@ -2,7 +2,10 @@ import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
 import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
 import 'package:crowdvise/features/account/presentation/manager/account_provider.dart';
 import 'package:crowdvise/features/auth/presentation/screens/login.dart';
+import 'package:crowdvise/features/session/presentation/manager/session_provider.dart';
+import 'package:crowdvise/features/history/presentation/manager/history_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
 
 class AccountScreen extends StatelessWidget {
@@ -126,7 +129,16 @@ class AccountScreen extends StatelessWidget {
                           onTap: () async {
                             await provider.logout();
                             if (context.mounted) {
-                              context.pushNamedAndClear(LoginScreen.id);
+                              try {
+                                context.read<SessionProvider>().reset();
+                                context.read<HistoryProvider>().reset();
+                              } catch (_) {}
+                              
+                              // Use rootNavigator: true to ensure the dashboard shell is discarded
+                              Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+                                LoginScreen.id,
+                                (route) => false,
+                              );
                             }
                           },
                           showDivider: false,

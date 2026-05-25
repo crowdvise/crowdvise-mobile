@@ -47,10 +47,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ModernSidebar(
                     selectedIndex: state.selectedIndex,
                     onDestinationSelected: (index) {
-                      // When switching tabs, reset the inner navigator stack
-                      dashboardNavigatorKey.currentState
-                          ?.popUntil((route) => route.isFirst);
                       provider.updateIndex(index);
+                      // Force the inner navigator to replace its stack with the new tab's screen
+                      dashboardNavigatorKey.currentState?.pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (_) => _screens.elementAt(index),
+                        ),
+                        (route) => false,
+                      );
                     },
                   ),
                 if (isDesktop)

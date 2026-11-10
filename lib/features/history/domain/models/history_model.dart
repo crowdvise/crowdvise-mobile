@@ -17,6 +17,7 @@ class RunModel {
     double overallDelayedRate;
     int readinessScore;
     String createdAt;
+    String? experimentId;
 
     RunModel({
         required this.id,
@@ -28,6 +29,7 @@ class RunModel {
         required this.overallDelayedRate,
         required this.readinessScore,
         required this.createdAt,
+        this.experimentId,
     });
 
 }

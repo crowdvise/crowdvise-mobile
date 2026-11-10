@@ -1,11 +1,11 @@
 import 'package:crowdvise/core/presentation/res/drawables.dart';
 import 'package:crowdvise/core/presentation/widgets/svg_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-class Button extends StatelessWidget {
+/// Primary action button. Solid signal fill, no glow, quiet hover.
+class Button extends StatefulWidget {
   const Button({
     super.key,
     required this.title,
@@ -14,6 +14,7 @@ class Button extends StatelessWidget {
     this.isEnabled = true,
     this.width,
     this.height,
+    this.showArrow = false,
   });
 
   final String title;
@@ -22,65 +23,66 @@ class Button extends StatelessWidget {
   final double? width;
   final double? height;
   final bool isEnabled;
+  final bool showArrow;
+
+  @override
+  State<Button> createState() => _ButtonState();
+}
+
+class _ButtonState extends State<Button> {
+  bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      height: height ?? 48,
-      width: width ?? double.infinity,
-      decoration: BoxDecoration(
-        color: isEnabled ? electricBlue : grey900,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: electricBlue.withValues(alpha: .5),
-            offset: const Offset(0, 4),
-            blurRadius: 2,
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          disabledBackgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(50)),
-          ),
-        ),
-        onPressed: isEnabled ? onPressed : null,
-        child: isLoading == true
-            ? LoadingAnimationWidget.dotsTriangle(
-                color: theme.colorScheme.surface,
-                size: 28,
-              )
-            : Row(
-                spacing: 8,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+    final enabled = widget.isEnabled && !widget.isLoading;
 
-                      color: isEnabled ? white : neutral600,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      child: GestureDetector(
+        onTap: enabled ? widget.onPressed : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          height: widget.height ?? 44,
+          width: widget.width ?? double.infinity,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: enabled ? (_hovered ? signalSoft : signal) : wsCardHover,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: widget.isLoading
+              ? LoadingAnimationWidget.waveDots(color: white, size: 24)
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: TextStyle(
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: enabled ? white : textTertiary,
+                      ),
                     ),
-                  ),
-                  SvgImage(
-                    asset: icArrowRight,
-                    height: 12,
-                    color: isEnabled ? white : neutral600,
-                  ),
-                ],
-              ),
+                    if (widget.showArrow) ...[
+                      const SizedBox(width: 8),
+                      SvgImage(
+                        asset: icArrowRight,
+                        height: 12,
+                        color: enabled ? white : textTertiary,
+                      ),
+                    ],
+                  ],
+                ),
+        ),
       ),
     );
   }
 }
 
-class BorderButton extends StatelessWidget {
+/// Secondary action. Neutral outline; never competes with the primary.
+class BorderButton extends StatefulWidget {
   const BorderButton({
     super.key,
     required this.title,
@@ -89,6 +91,7 @@ class BorderButton extends StatelessWidget {
     this.isEnabled = true,
     this.width,
     this.height,
+    this.destructive = false,
   });
 
   final String title;
@@ -97,52 +100,54 @@ class BorderButton extends StatelessWidget {
   final double? width;
   final double? height;
   final bool isEnabled;
+  final bool destructive;
+
+  @override
+  State<BorderButton> createState() => _BorderButtonState();
+}
+
+class _BorderButtonState extends State<BorderButton> {
+  bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      height: height ?? 48,
-      width: width ?? double.infinity,
-      decoration: BoxDecoration(
-        color: nearBlack,
+    final enabled = widget.isEnabled && !widget.isLoading;
+    final fg = !enabled
+        ? textTertiary
+        : widget.destructive
+            ? statusDanger
+            : textPrimary;
 
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: electricBlue, width: 2),
-      ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          disabledBackgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(50)),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      child: GestureDetector(
+        onTap: enabled ? widget.onPressed : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          height: widget.height ?? 44,
+          width: widget.width ?? double.infinity,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: _hovered && enabled ? wsCardHover : wsCard,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: _hovered && enabled ? hairlineStrong : hairline,
+            ),
           ),
+          child: widget.isLoading
+              ? LoadingAnimationWidget.waveDots(color: textSecondary, size: 24)
+              : Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontFamily: 'PlusJakartaSans',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: fg,
+                  ),
+                ),
         ),
-        onPressed: isEnabled ? onPressed : null,
-        child: isLoading == true
-            ? LoadingAnimationWidget.waveDots(
-                color: theme.colorScheme.surface,
-                size: 28,
-              )
-            : Row(
-                spacing: 8,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 14,
-                      color: isEnabled ? electricBlue : neutral500,
-                    ),
-                  ),
-                  SvgImage(
-                    asset: icArrowRight,
-                    color: electricBlue,
-                    height: 14,
-                  ),
-                ],
-              ),
       ),
     );
   }

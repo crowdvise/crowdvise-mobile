@@ -1,16 +1,16 @@
+import 'package:crowdvise/core/presentation/res/drawables.dart';
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/core/presentation/utils/custom_state.dart';
 import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
 import 'package:crowdvise/core/presentation/utils/snack_bar_utils.dart';
-import 'package:crowdvise/features/auth/presentation/screens/login.dart';
+import 'package:crowdvise/core/presentation/widgets/app_background.dart';
+import 'package:crowdvise/core/presentation/widgets/svg_image.dart';
+import 'package:crowdvise/features/landing/presentation/screens/landing_screen.dart';
 import 'package:crowdvise/features/session/presentation/screens/dashboard.dart';
 import 'package:crowdvise/features/splash/manager/splash_provider.dart';
-import 'package:crowdvise/features/splash/screen/onboarding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
-import 'package:sprung/sprung.dart';
-
 class SplashScreen extends StatefulWidget {
   static const String id = "/";
   const SplashScreen({super.key});
@@ -19,36 +19,15 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends CustomState<SplashScreen>
-    with SingleTickerProviderStateMixin {
+class _SplashScreenState extends CustomState<SplashScreen> {
   SplashProvider? _provider;
-  late AnimationController _controller;
-  late Animation<Offset> _animation;
-
-  @override
-  void onStart() {
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-
-    _animation = Tween<Offset>(
-      begin: const Offset(0.0, 1.0), // Start at the bottom
-      end: const Offset(0.0, 0.0), // End at the center
-    ).animate(CurvedAnimation(parent: _controller, curve: Sprung.underDamped));
-
-    _controller.forward();
-    super.onStart();
-  }
 
   @override
   void onStarted() {
     _provider?.listen((event) {
       logg("$event");
-      if (event == -1) {
-        context.push(OnboardingScreen());
-      } else if (event == 0) {
-        context.pushNamedAndClear(LoginScreen.id);
+      if (event == -1 || event == 0) {
+        context.pushNamedAndClear(LandingScreen.id);
       } else {
         context.pushNamedAndClear(DashboardScreen.id);
       }
@@ -66,55 +45,69 @@ class _SplashScreenState extends CustomState<SplashScreen>
           _provider ??= provider;
           return Scaffold(
             backgroundColor: nearBlack,
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SlideTransition(
-                  position: _animation,
-                  child:
-                      Center(
-                            child: Text.rich(
-                              TextSpan(
-                                text: "Crowd",
-                                style: theme.textTheme.displayLarge?.copyWith(
-                                  color: white,
-                                  fontSize: 40,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: "Vise",
-                                    style: theme.textTheme.displayLarge
-                                        ?.copyWith(
-                                          color: electricBlue,
-                                          fontSize: 40,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                          .animate(
-                            onPlay: (controller) {
-                              controller.forward();
-                            },
-                          )
-                          .then(delay: 500.ms)
-                          .fadeIn(duration: 1000.ms, curve: Curves.easeInExpo)
-                          .slideY(
-                            delay: 800.ms,
-                            begin: 0.5,
-                            duration: 600.ms,
-                            curve: Sprung.overDamped,
-                          )
-                          .then(delay: 500.ms)
-                          .shimmer(
-                            delay: 100.ms,
-                            duration: 1800.ms,
-                            color: Colors.white.withValues(alpha: .7),
+            body: AppBackground(
+              showGrid: false,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SvgImage(
+                          asset: crowdviseSymbol,
+                          width: 64,
+                          height: 64,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'CrowdVise',
+                          style: theme.textTheme.displayLarge?.copyWith(
+                            fontSize: 36,
+                            fontWeight: FontWeight.w800,
+                            color: textPrimary,
+                            letterSpacing: -0.8,
                           ),
-                ),
-              ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Customer research, before you ship',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: textTertiary,
+                            fontSize: 14,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    )
+                        .animate()
+                        .fadeIn(duration: 500.ms, curve: Curves.easeOut)
+                        .slideY(
+                          begin: 0.08,
+                          end: 0,
+                          duration: 500.ms,
+                          curve: Curves.easeOutCubic,
+                        ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 48,
+                    child: Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: signal,
+                        ),
+                      ).animate().fadeIn(delay: 600.ms, duration: 300.ms),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },

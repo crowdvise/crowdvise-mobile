@@ -1,7 +1,4 @@
 import 'package:crowdvise/features/session/presentation/screens/dashboard.dart';
-import 'package:crowdvise/features/session/presentation/screens/home.dart';
-import 'package:crowdvise/features/session/presentation/manager/dashboard_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
 extension Navigation on BuildContext {
@@ -25,7 +22,7 @@ extension Navigation on BuildContext {
     return Navigator.of(this).pushNamed(route, arguments: args);
   }
 
-  pop([Object? arg]) {
+  void pop([Object? arg]) {
     Navigator.of(this).pop(arg);
   }
 
@@ -51,7 +48,7 @@ extension Navigation on BuildContext {
         arguments: args);
   }
 
-  popUntil(List<String> id) {
+  void popUntil(List<String> id) {
     Navigator.of(this).popUntil((route) {
       return id.contains(route.settings.name);
     });
@@ -81,6 +78,19 @@ extension Navigation on BuildContext {
     return pushReplacement(screen);
   }
 
+  /// Replaces the whole detail stack with [screen], keeping the dashboard tab
+  /// root underneath. Used after a simulation/fix run so Back returns home
+  /// instead of re-entering the loading flow.
+  Future<dynamic> replaceInnerUntilRoot(Widget screen) {
+    final route = MaterialPageRoute(builder: (_) => screen);
+    final inner = dashboardNavigatorKey.currentState;
+    if (inner != null) {
+      return inner.pushAndRemoveUntil(route, (r) => r.isFirst);
+    }
+    return Navigator.of(this, rootNavigator: true)
+        .pushAndRemoveUntil(route, (r) => r.isFirst);
+  }
+
   /// Pops inside the dashboard nested navigator if it can, otherwise pops root.
   void popInner([Object? arg]) {
     final inner = dashboardNavigatorKey.currentState;
@@ -106,15 +116,8 @@ extension Navigation on BuildContext {
   void goHome() {
     final inner = dashboardNavigatorKey.currentState;
     if (inner != null) {
-      // On Web/Desktop, force the inner navigator stack to clear and show HomeScreen
-      try {
-        Provider.of<DashboardProvider>(inner.context, listen: false).updateIndex(0);
-      } catch (_) {}
-      
-      inner.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
+      // Desktop: pop detail screens off the inner navigator and show Home.
+      switchDashboardTab(inner.context, 0);
     } else {
       // On Mobile, replace the root stack
       Navigator.of(this, rootNavigator: true).pushNamedAndRemoveUntil(

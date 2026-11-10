@@ -1,270 +1,194 @@
-import 'package:crowdvise/core/presentation/res/drawables.dart';
-import 'package:crowdvise/core/presentation/widgets/svg_image.dart';
+import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/features/history/domain/models/history_model.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
-class HistoryCard extends StatelessWidget {
+/// Flat run card: title, meta line, outcome bar, score. No glow, no glass.
+class HistoryCard extends StatefulWidget {
   final RunModel run;
   final VoidCallback? onTap;
 
   const HistoryCard({super.key, required this.run, this.onTap});
 
-  Color _getStatusColor(int score) {
-    if (score >= 70) return const Color(0xff00FF87); // Ready
-    if (score >= 40) return const Color(0xffFFB03A); // Needs work
-    return const Color(0xffFF5C7A); // Not ready
+  @override
+  State<HistoryCard> createState() => _HistoryCardState();
+}
+
+class _HistoryCardState extends State<HistoryCard> {
+  bool _hover = false;
+
+  Color _tone(int score) {
+    if (score >= 70) return statusReady;
+    if (score >= 40) return statusWarning;
+    return statusDanger;
   }
 
-  String _getStatusLabel(int score) {
+  String _label(int score) {
     if (score >= 70) return 'Ready';
     if (score >= 40) return 'Needs work';
     return 'Not ready';
   }
 
-  String _formatDate(String dateStr) {
+  String _date(String iso) {
     try {
-      final dateTime = DateTime.parse(dateStr);
-      return DateFormat('MMM d, yyyy').format(dateTime);
-    } catch (e) {
-      return dateStr;
+      return DateFormat('MMM d, yyyy').format(DateTime.parse(iso));
+    } catch (_) {
+      return iso;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(run.readinessScore);
-    final statusLabel = _getStatusLabel(run.readinessScore);
+    final run = widget.run;
+    final tone = _tone(run.readinessScore);
+    final conv = (run.overallConversionRate * 100).round();
+    final delay = (run.overallDelayedRate * 100).round();
+    final drop = (run.overallDropoutRate * 100).round();
+    final title = run.productDescription.split('.').first.trim();
 
-    final convPercent = (run.overallConversionRate * 100).round();
-    final delayPercent = (run.overallDelayedRate * 100).round();
-    final dropPercent = (run.overallDropoutRate * 100).round();
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF131314),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.05),
-            width: 1.5,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: _hover ? wsCardHover : wsCard,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _hover ? hairlineStrong : hairline),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top Row: Date/Duration & Status Badge
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      SvgImage(asset: calendar, color: Colors.white54, height: 14,),
-                      const Gap(6),
-                      Expanded(
-                        child: Text(
-                          _formatDate(run.createdAt),
-                          style: const TextStyle(
-                            color: Colors.white54,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title.isEmpty ? run.productDescription : title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: textPrimary,
+                        height: 1.35,
                       ),
-                    ],
-                  ),
-                ),
-                const Gap(8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: statusColor.withValues(alpha: 0.2),
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  const Gap(12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: statusColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: statusColor.withValues(alpha: 0.5),
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Gap(6),
-                      Text(
-                        statusLabel.toUpperCase(),
-                        style: TextStyle(
-                          color: statusColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const Gap(6),
                       Text(
                         '${run.readinessScore}',
                         style: TextStyle(
-                          color: statusColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
+                          fontFamily: 'Syne',
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: tone,
+                          height: 1,
+                        ),
+                      ),
+                      const Gap(3),
+                      Text(
+                        _label(run.readinessScore),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: tone,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-            const Gap(16),
-
-            // Middle Section: Product Name
-            Text(
-              run.productDescription,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                height: 1.2,
+                ],
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const Gap(12),
-
-            // Chips: Agents & Stages
-            _buildInfoChip(Icons.person_outline, '${run.panelSize} Agents'),
-
-            const Gap(24),
-
-            // Bottom Section: Progress Bar & Legend
-            Container(
-              height: 8,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(4),
+              const Gap(8),
+              Text(
+                '${run.targetSegment} · ${run.panelSize} personas · ${_date(run.createdAt)}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12.5, color: textTertiary),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Row(
-                  children: [
-                    if (convPercent > 0)
-                      Expanded(
-                        flex: convPercent,
-                        child: Container(color: const Color(0xff00FF87)),
-                      ),
-                    if (delayPercent > 0)
-                      Expanded(
-                        flex: delayPercent,
-                        child: Container(color: const Color(0xffFFB03A)),
-                      ),
-                    if (dropPercent > 0)
-                      Expanded(
-                        flex: dropPercent,
-                        child: Container(color: const Color(0xffFF5C7A)),
-                      ),
-                  ],
+              const Gap(14),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: SizedBox(
+                  height: 4,
+                  child: Row(
+                    children: [
+                      if (conv > 0)
+                        Expanded(
+                          flex: conv,
+                          child: const ColoredBox(color: statusReady),
+                        ),
+                      if (delay > 0)
+                        Expanded(
+                          flex: delay,
+                          child: const ColoredBox(color: statusWarning),
+                        ),
+                      if (drop > 0)
+                        Expanded(
+                          flex: drop,
+                          child: const ColoredBox(color: statusDanger),
+                        ),
+                      if (conv + delay + drop == 0)
+                        const Expanded(
+                          child: ColoredBox(color: hairlineStrong),
+                        ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const Gap(18),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.spaceBetween,
-              children: [
-                _buildLegendItem(
-                  const Color(0xff00FF87),
-                  'Converted',
-                  convPercent,
-                ),
-                _buildLegendItem(
-                  const Color(0xffFFB03A),
-                  'Delayed',
-                  delayPercent,
-                ),
-                _buildLegendItem(
-                  const Color(0xffFF5C7A),
-                  'Dropped',
-                  dropPercent,
-                ),
-              ],
-            ),
-          ],
+              const Gap(10),
+              Wrap(
+                spacing: 14,
+                runSpacing: 6,
+                children: [
+                  _Legend(color: statusReady, label: 'Converted', value: conv),
+                  _Legend(color: statusWarning, label: 'Delayed', value: delay),
+                  _Legend(color: statusDanger, label: 'Dropped', value: drop),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildInfoChip(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgImage(asset: user, color: Colors.white70, height: 14,),
-          const Gap(6),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+class _Legend extends StatelessWidget {
+  const _Legend({
+    required this.color,
+    required this.label,
+    required this.value,
+  });
+  final Color color;
+  final String label;
+  final int value;
 
-  Widget _buildLegendItem(Color color, String label, int percent) {
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 8,
-          height: 8,
+          width: 6,
+          height: 6,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const Gap(6),
         Text(
-          '$percent% $label',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
+          '$value% $label',
+          style: const TextStyle(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w500,
+            color: textSecondary,
           ),
         ),
       ],

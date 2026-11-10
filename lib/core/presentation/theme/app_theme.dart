@@ -3,185 +3,150 @@ import 'package:crowdvise/core/presentation/theme/colors/snack_bar_colors.dart';
 import 'package:crowdvise/core/presentation/theme/my_text_theme.dart';
 import 'package:flutter/material.dart';
 
+/// Single dark theme. One accent (signal), flat surfaces, 1px hairlines.
 mixin AppTheme {
-  ThemeData lightTheme() {
-    return ThemeData.from(
-      colorScheme: const ColorScheme.light(
-        surface: nearBlack,
-        onSurface: white,
-        tertiary: Color(0xFFA9D478), //textAccentLight,
-        secondary: Color(0xffDBE3F3),
-        error: errorForeground,
-      ),
-    ).copyWith(
-      scaffoldBackgroundColor: const Color(0xffF8F8F8),
-      primaryColor: _buttonLightColor,
-      splashFactory: NoSplash.splashFactory,
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: _buttonLightColor,
-        foregroundColor: Colors.white,
-        elevation: 2,
-      ),
-      dividerColor: neutral300,
-      cardTheme: CardThemeData(
-        color: const Color(0xffF7F7F8),
-        surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black,
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        hintStyle: const TextStyle(
-          color: Color(0xFFA4A7AE),
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 14,
-        ),
-        
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 12,
-        ),
-        filled: true,
-        // fillColor: Color(0xFF2A2A2A),
-        fillColor: const Color(0xFF131314),
-        errorStyle: const TextStyle(
-          color: errorForeground,
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 14,
-        ),
-        border: _inputBorderLight,
-        enabledBorder: _emptyInputBorderLight,
-        focusedBorder: _inputBorderLight,
-        disabledBorder: _emptyInputBorderLight,
-        errorBorder: _errorInputBorderLight,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _buttonLightColor,
-          disabledBackgroundColor: Colors.grey,
-          minimumSize: const Size(double.infinity, double.infinity),
-          foregroundColor: Colors.white,
+  ThemeData lightTheme() => _theme(MyTextTheme.lightTextTheme);
+  ThemeData darkTheme() => _theme(MyTextTheme.darkTextTheme);
 
-          shadowColor: const Color(0xFF0A43CA).withValues(alpha: .05),
-          textStyle: const TextStyle(
-            fontFamily: 'PlusJakartaSans',
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-          overlayColor: Colors.white,
-          splashFactory: NoSplash.splashFactory,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(24)),
-          ),
-        ),
-      ),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: const Color(0xFF1e1e1e),
-        selectionColor: const Color(0xFF1e1e1e).withValues(alpha: .05),
-        selectionHandleColor: const Color(0xFF1e1e1e).withValues(alpha: .07),
-      ),
-      textTheme: MyTextTheme.lightTextTheme,
-    );
-  }
-
-  ThemeData darkTheme() {
+  ThemeData _theme(TextTheme textTheme) {
     return ThemeData.from(
       colorScheme: const ColorScheme.dark(
-        surface: Color(0xff010101),
-        onSurface: Color(0xFFEAEDEF),
-        tertiary: Color(0xFFA9D478), //textAccentDark,
-        secondary: Color(0xff13171A),
+        surface: wsCanvas,
+        onSurface: textPrimary,
+        primary: signal,
+        onPrimary: white,
+        secondary: wsCard,
+        tertiary: statusReady,
+        error: errorForeground,
+        outline: hairline,
       ),
     ).copyWith(
-      scaffoldBackgroundColor: const Color(0xff010101),
-      cardColor: const Color(0xFF0F1A1C),
-      primaryColor: _buttonDarkColor,
+      scaffoldBackgroundColor: wsCanvas,
+      canvasColor: wsCanvas,
+      cardColor: wsCard,
+      primaryColor: signal,
       splashFactory: NoSplash.splashFactory,
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: _buttonDarkColor,
-        foregroundColor: Colors.white,
-        elevation: 2,
-      ),
-
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.white.withValues(alpha: 0.03),
+      dividerColor: hairline,
+      visualDensity: VisualDensity.compact,
       cardTheme: CardThemeData(
-        color: const Color(0xffF7F7F8),
+        color: wsCard,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black,
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: hairline),
+        ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        hintStyle: const TextStyle(
-          color: Color(0xFF959595),
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 14,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 12,
-        ),
-        filled: true,
-        fillColor: const Color(0xff191D20),
-        errorStyle: const TextStyle(
-          color: errorForeground,
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 14,
-        ),
-        border: _inputBorderDark,
-        enabledBorder: _inputBorderDark,
-        focusedBorder: _inputBorderDark,
-        disabledBorder: _inputBorderDark,
-        errorBorder: _inputBorderDark,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _buttonDarkColor,
-          disabledBackgroundColor: Colors.grey,
-          minimumSize: const Size(double.infinity, double.infinity),
-          foregroundColor: Colors.white,
-          shadowColor: const Color(0xFF0A43CA).withValues(alpha: .05),
+      inputDecorationTheme: _inputDecorationTheme,
+      elevatedButtonTheme: _elevatedButtonTheme,
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: textSecondary,
+          splashFactory: NoSplash.splashFactory,
           textStyle: const TextStyle(
             fontFamily: 'PlusJakartaSans',
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFFEAEDEF),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
           ),
-          splashFactory: NoSplash.splashFactory,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(50)),
-          ),
+        ),
+      ),
+      iconTheme: const IconThemeData(color: textSecondary, size: 20),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: wsCard,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: false,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+      ),
+      dialogTheme: const DialogThemeData(
+        backgroundColor: wsCard,
+        surfaceTintColor: Colors.transparent,
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: wsCardHover,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: hairline),
+        ),
+        textStyle: const TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 12,
+          color: textPrimary,
         ),
       ),
       textSelectionTheme: TextSelectionThemeData(
-        cursorColor: const Color(0xFFEAEDEF),
-        selectionColor: const Color(0xFFEAEDEF).withValues(alpha: .05),
-        selectionHandleColor: const Color(0xFFEAEDEF).withValues(alpha: .07),
+        cursorColor: signal,
+        selectionColor: signal.withValues(alpha: 0.25),
+        selectionHandleColor: signal,
       ),
-      textTheme: MyTextTheme.darkTextTheme,
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: signal,
+        linearTrackColor: hairline,
+        circularTrackColor: hairline,
+      ),
+      textTheme: textTheme,
     );
   }
 
-  static const _buttonLightColor = Color(0xFF000000);
-  // static const _buttonDarkColor = Color(0xFFFFFFFF);
-  static const _buttonDarkColor = Color(0xFFA9D478);
+  static final _inputDecorationTheme = InputDecorationTheme(
+    hintStyle: const TextStyle(
+      color: textTertiary,
+      fontFamily: 'PlusJakartaSans',
+      fontSize: 14,
+    ),
+    contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+    filled: true,
+    fillColor: wsCard,
+    isDense: true,
+    errorStyle: const TextStyle(
+      color: errorForeground,
+      fontFamily: 'PlusJakartaSans',
+      fontSize: 12.5,
+    ),
+    border: _inputBorder,
+    enabledBorder: _inputBorder,
+    focusedBorder: _inputBorderFocused,
+    disabledBorder: _inputBorder,
+    errorBorder: _inputBorderError,
+    focusedErrorBorder: _inputBorderError,
+  );
 
-  static final _inputBorderLight = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide(color: electricBlue),
-  );
-  static final _errorInputBorderLight = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide(color: error400),
-  );
-  static final _emptyInputBorderLight = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
-    borderSide: BorderSide.none,
+  static final _elevatedButtonTheme = ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: signal,
+      disabledBackgroundColor: wsCardHover,
+      minimumSize: const Size(double.infinity, 44),
+      foregroundColor: white,
+      elevation: 0,
+      textStyle: const TextStyle(
+        fontFamily: 'PlusJakartaSans',
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: white,
+      ),
+      splashFactory: NoSplash.splashFactory,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
   );
 
-  static final _inputBorderDark = OutlineInputBorder(
-    borderRadius: BorderRadius.circular(6),
-    // borderSide: BorderSide.none,
-    borderSide: const BorderSide(color: Color(0xffe4e4e4)),
+  static final _inputBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    borderSide: const BorderSide(color: hairlineStrong),
+  );
+
+  static final _inputBorderFocused = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    borderSide: const BorderSide(color: signal, width: 1.2),
+  );
+
+  static final _inputBorderError = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    borderSide: const BorderSide(color: error400),
   );
 }

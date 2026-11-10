@@ -1,7 +1,7 @@
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
-import 'package:crowdvise/features/session/presentation/widgets/outlined_card.dart';
 import 'package:flutter/material.dart';
 
+/// One stage in the journey list. Index rail on the left, quiet actions right.
 class JourneyCard extends StatefulWidget {
   const JourneyCard({
     super.key,
@@ -22,74 +22,85 @@ class JourneyCard extends StatefulWidget {
 }
 
 class _JourneyCardState extends State<JourneyCard> {
+  bool _hover = false;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: grey300.withValues(alpha: .09),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: neutral500, width: .5),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+        decoration: BoxDecoration(
+          color: _hover ? wsCardHover : wsCard,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: _hover ? hairlineStrong : hairline),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 24,
+              child: Text(
+                widget.index.toString().padLeft(2, '0'),
+                style: const TextStyle(
+                  fontFamily: 'Syne',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: signal,
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.description,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: textSecondary,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            _IconBtn(icon: Icons.edit_outlined, onTap: widget.onEdit),
+            _IconBtn(icon: Icons.close_rounded, onTap: widget.onDelete),
+          ],
+        ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 12,
-        children: [
-          OutlinedCard(
-            height: 32,
-            width: 32,
-            widget: Text(
-              widget.index.toString(),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: electricBlue,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            onTap: () {},
-          ),
+    );
+  }
+}
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 8,
-              children: [
-                Text(
-                  widget.title,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Text(
-                  widget.description,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 12,
-                    color: Colors.white60,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Row(
-            spacing: 4,
-            children: [
-              OutlinedCard(
-                height: 24,
-                width: 24,
-                onTap: widget.onEdit,
-                widget: Icon(Icons.edit_outlined, size: 16, color: grey300),
-              ),
-              OutlinedCard(
-                height: 24,
-                width: 24,
-                onTap: widget.onDelete,
-                widget: Icon(Icons.close_rounded, size: 16, color: grey300),
-              ),
-            ],
-          ),
-        ],
+class _IconBtn extends StatelessWidget {
+  const _IconBtn({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Icon(icon, size: 16, color: textTertiary),
       ),
     );
   }

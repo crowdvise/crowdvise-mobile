@@ -24,9 +24,9 @@ class OutlinedCard extends StatelessWidget {
         width: width,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: grey300.withValues(alpha: .09),
+          color: wsCard,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: neutral500, width: .5),
+          border: Border.all(color: hairline),
         ),
         child: widget,
       ),

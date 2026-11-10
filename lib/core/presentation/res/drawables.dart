@@ -22,6 +22,10 @@ const user = 'assets/vectors/user.svg';
 const home = 'assets/vectors/home.svg';
 const briefcase = 'assets/vectors/briefcase.svg';
 
+// Brand
+const crowdviseSymbol = 'assets/vectors/crowdvise-symbol.svg';
+const crowdviseLogo = 'assets/vectors/crowdvise-logo-dark.svg';
+
 //Navbar icons
 
 //Images

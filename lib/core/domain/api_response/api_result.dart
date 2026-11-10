@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
@@ -57,8 +56,6 @@ class ApiResult<T> {
       }
     } else if (e is TimeoutException) {
       return 'Request timed out';
-    } else if (e is SocketException) {
-      return 'Connection could not be established. Check internet';
     } else if (e is FormatException) {
       return e.message;
     } else if (e is String) {

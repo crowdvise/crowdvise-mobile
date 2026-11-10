@@ -9,44 +9,55 @@ import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
 class HistoryProvider extends CustomProvider {
   final _repo = getIt.get<HistoryRepository>();
   var state = HistoryState();
+  String? lastError;
 
   void reset() {
     state = HistoryState();
+    lastError = null;
     notifyListeners();
   }
 
-  void fetchHistory() {
-    onLoad();
-
-    final result = GetHistoryUsecase(_repo).invoke();
-    result.then((value) {
+  Future<void> fetchHistory() async {
+    if (loading) return;
+    setLoading(true);
+    lastError = null;
+    try {
+      final value = await GetHistoryUsecase(_repo).invoke();
       final result = value.getOrElse((error) {
+        lastError = error.toString();
         add(error);
         return null;
       });
 
       if (result != null) {
-        add(result);
-        state.history.clear();
-        state.history.addAll(result.runs);
+        state.history
+          ..clear()
+          ..addAll(result.runs);
       }
-      onLoad();
-    });
+    } catch (e) {
+      lastError = 'Could not load your history. Please try again.';
+      add(lastError!);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  void gePastSimulations({required String simulationId}) {
-    onLoad();
-
-    final result = GetPastSimulationUsecase(_repo, simulationId).invoke();
-    result.then((value) {
+  Future<void> gePastSimulations({required String simulationId}) async {
+    if (loading) return;
+    setLoading(true);
+    lastError = null;
+    try {
+      final value = await GetPastSimulationUsecase(_repo, simulationId).invoke();
       final result = value.getOrElse((error) {
+        lastError = error.toString();
         add(error);
         return null;
       });
 
       if (result != null) {
-        add(result);
         state.histroyDetails = result;
+        state.subcribed = 0;
+        state.dropped = 0;
         for (var agentJourney in result.agentJourneys) {
           if (agentJourney.finalOutcome == "converted" &&
               agentJourney.droppedAtStage == null) {
@@ -57,8 +68,12 @@ class HistoryProvider extends CustomProvider {
           }
         }
       }
-      onLoad();
-    });
+    } catch (e) {
+      lastError = 'Could not load this run. Please try again.';
+      add(lastError!);
+    } finally {
+      setLoading(false);
+    }
   }
 
   String getHeadlineInsight(SimulationModel simulation) {

@@ -22,7 +22,7 @@ class ProblemScreen extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 16.0),
           child: Center(
             child: Text(
-              '— VS —',
+              'VS',
               style: TextStyle(
                 color: Colors.white30,
                 fontWeight: FontWeight.w600,

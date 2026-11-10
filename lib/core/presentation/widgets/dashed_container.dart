@@ -30,13 +30,13 @@ class DashedBorderPainter extends CustomPainter {
     const dashSpace = 3.0;
 
     final paint = Paint()
-      ..color = electricBlue
+      ..color = hairlineStrong
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
     final rect = RRect.fromRectAndRadius(
       Offset.zero & size,
-      const Radius.circular(12),
+      const Radius.circular(10),
     );
 
     final path = Path()..addRRect(rect);

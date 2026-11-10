@@ -56,7 +56,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Text(
-                '— VS —',
+                'VS',
                 style: TextStyle(
                   color: Colors.white30,
                   fontWeight: FontWeight.w600,
@@ -76,7 +76,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
     OnboardingStepData(
       title: "The Solution",
-      description: "Meet your synthetic panel. AI customers that behave like real humans—some drop off, some subscribe, some complain loudly.",
+      description: "Meet your synthetic panel. AI customers that behave like real humans. Some drop off, some subscribe, and some complain loudly.",
       visual: const SingleChildScrollView(child: AvatarGrid2()),
     ),
     OnboardingStepData(
@@ -120,12 +120,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final state = provider.state;
     final currentStep = state.currentPage;
 
-    return Center(
-      child: Container(
-        width: 1000,
-        height: 600,
-        margin: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = (constraints.maxWidth - 48).clamp(0.0, 1000.0);
+        final height = (constraints.maxHeight - 48).clamp(0.0, 640.0);
+        return Center(
+          child: Container(
+            width: width,
+            height: height,
+            margin: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.white10),
@@ -329,7 +333,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ],
         ),
-      ),
+          ),
+        );
+      },
     );
   }
 

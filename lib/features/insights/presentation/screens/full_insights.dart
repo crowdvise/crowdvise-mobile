@@ -1,5 +1,6 @@
+import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
+import 'package:crowdvise/core/presentation/widgets/page_header.dart';
 import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
-import 'package:crowdvise/core/presentation/widgets/scrollable_widget.dart';
 import 'package:crowdvise/features/history/presentation/manager/history_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -12,74 +13,85 @@ class FullInsightsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final wide = MediaQuery.sizeOf(context).width >= 1000;
+    final pad = wide ? 32.0 : 20.0;
     return ProviderWidget(
       provider: HistoryProvider(),
-      appBarTitle: 'Top Insights',
+      appBarTitle: 'Insights',
       leading: true,
+      padding: 0,
       children: (provider, theme) {
         return [
           Expanded(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Gap(16),
-                    Text(
-                      'Detailed objections and positive signals gathered from the simulation.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontSize: 14,
-                        color: Colors.white54,
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(pad, 28, pad, 40),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 760),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      PageHeader(
+                        eyebrow: '${insights.length} insights',
+                        title: 'What the panel told us',
+                        description:
+                            'Objections and positive signals, ranked by how many personas raised them.',
                       ),
-                    ),
-                    const Gap(32),
-                    ScrollableWidget(
-                      children: insights.map((insight) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF131314),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.white10),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF5B7FFF,
-                                    ).withValues(alpha: 0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.lightbulb_outline,
-                                    color: Color(0xFF5B7FFF),
-                                    size: 20,
-                                  ),
+                      const Gap(24),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: wsCard,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: hairline),
+                        ),
+                        child: Column(
+                          children: [
+                            for (var i = 0; i < insights.length; i++)
+                              Container(
+                                padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+                                decoration: BoxDecoration(
+                                  border: i == insights.length - 1
+                                      ? null
+                                      : const Border(
+                                          bottom: BorderSide(color: hairline),
+                                        ),
                                 ),
-                                const Gap(16),
-                                Expanded(
-                                  child: Text(
-                                    insight,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontSize: 14,
-                                      color: Colors.white70,
-                                      height: 1.5,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: 24,
+                                      child: Text(
+                                        (i + 1).toString().padLeft(2, '0'),
+                                        style: const TextStyle(
+                                          fontFamily: 'Syne',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: signal,
+                                          height: 1.5,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    const Gap(8),
+                                    Expanded(
+                                      child: Text(
+                                        insights[i],
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: textPrimary,
+                                          height: 1.55,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

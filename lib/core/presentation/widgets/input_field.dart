@@ -73,10 +73,11 @@ class _InputFieldState extends TextFieldState<InputField> {
         onEditingComplete: widget.onAction,
         textInputAction: widget.inputAction,
         style: theme.textTheme.labelMedium?.copyWith(
-          color: white,
+          color: textPrimary,
+          fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        cursorColor: grey200,
+        cursorColor: signal,
         inputFormatters: widget.inputFormatters,
         onTapOutside: (_) {
           focus.unfocus();
@@ -89,15 +90,15 @@ class _InputFieldState extends TextFieldState<InputField> {
               ? null
               : SvgImage(
                   asset: widget.prefix!,
-                  height: 20,
-                  width: 20,
-                  color: grey200,
+                  height: 18,
+                  width: 18,
+                  color: textTertiary,
                   fit: BoxFit.scaleDown,
                 ),
           prefixText: widget.prefixText,
           prefixStyle: theme.textTheme.bodyMedium?.copyWith(
-            color: neutral700,
-            fontWeight: FontWeight.bold,
+            color: textSecondary,
+            fontWeight: FontWeight.w600,
           ),
           suffix: widget.isPassword
               ? Clickable(
@@ -106,9 +107,9 @@ class _InputFieldState extends TextFieldState<InputField> {
                   }),
                   child: SvgImage(
                     asset: isPassword ? icEye : icEyeSlash,
-                    height: 20,
-                    width: 20,
-                    color: white,
+                    height: 18,
+                    width: 18,
+                    color: textTertiary,
                   ),
                 )
               : widget.isClear && value.isNotEmpty

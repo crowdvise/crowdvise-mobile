@@ -25,6 +25,7 @@ RunDto _$RunDtoFromJson(Map<String, dynamic> json) => RunDto(
   overallDelayedRate: (json['overall_delayed_rate'] as num).toDouble(),
   readinessScore: (json['readiness_score'] as num).toInt(),
   createdAt: json['created_at'] as String,
+  experimentId: json['experiment_id'] as String?,
 );
 
 Map<String, dynamic> _$RunDtoToJson(RunDto instance) => <String, dynamic>{
@@ -37,4 +38,5 @@ Map<String, dynamic> _$RunDtoToJson(RunDto instance) => <String, dynamic>{
   'overall_delayed_rate': instance.overallDelayedRate,
   'readiness_score': instance.readinessScore,
   'created_at': instance.createdAt,
+  'experiment_id': instance.experimentId,
 };

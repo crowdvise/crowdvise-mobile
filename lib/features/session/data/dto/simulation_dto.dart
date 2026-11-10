@@ -1,12 +1,8 @@
-// To parse this JSON data, do
-//
-//     final simulationDto = simulationDtoFromJson(jsonString);
+import 'dart:convert';
 
-// ignore_for_file: constant_identifier_names
-
+import 'package:crowdvise/core/data/json_helpers.dart';
 import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'dart:convert';
 
 part 'simulation_dto.g.dart';
 
@@ -15,23 +11,36 @@ SimulationDto simulationDtoFromJson(String str) =>
 
 String simulationDtoToJson(SimulationDto data) => json.encode(data.toJson());
 
+List<AgentJourneyDto> _journeys(Object? v) =>
+    jsonMapList(v).map(AgentJourneyDto.fromJson).toList();
+List<StageInsightDto> _stages(Object? v) =>
+    jsonMapList(v).map(StageInsightDto.fromJson).toList();
+List<ReactionDto> _reactions(Object? v) =>
+    jsonMapList(v).map(ReactionDto.fromJson).toList();
+OceanDto _ocean(Object? v) =>
+    OceanDto.fromJson(v is Map<String, dynamic> ? v : const {});
+TriggerSensitivitiesDto _triggers(Object? v) =>
+    TriggerSensitivitiesDto.fromJson(v is Map<String, dynamic> ? v : const {});
+AgentDto _agent(Object? v) =>
+    AgentDto.fromJson(v is Map<String, dynamic> ? v : const {});
+
 @JsonSerializable()
 class SimulationDto {
-  @JsonKey(name: "simulation_id")
+  @JsonKey(name: "simulation_id", fromJson: jsonString)
   String simulationId;
-  @JsonKey(name: "overall_conversion_rate")
+  @JsonKey(name: "overall_conversion_rate", fromJson: jsonDouble)
   double overallConversionRate;
-  @JsonKey(name: "overall_dropout_rate")
+  @JsonKey(name: "overall_dropout_rate", fromJson: jsonDouble)
   double overallDropoutRate;
-  @JsonKey(name: "overall_delayed_rate")
+  @JsonKey(name: "overall_delayed_rate", fromJson: jsonDouble)
   double overallDelayedRate;
-  @JsonKey(name: "agent_journeys")
+  @JsonKey(name: "agent_journeys", fromJson: _journeys)
   List<AgentJourneyDto> agentJourneys;
-  @JsonKey(name: "stage_insights")
+  @JsonKey(name: "stage_insights", fromJson: _stages)
   List<StageInsightDto> stageInsights;
-  @JsonKey(name: "top_insights")
+  @JsonKey(name: "top_insights", fromJson: jsonStringList)
   List<String> topInsights;
-  @JsonKey(name: "readiness_score")
+  @JsonKey(name: "readiness_score", fromJson: jsonInt)
   int readinessScore;
 
   SimulationDto({
@@ -66,13 +75,13 @@ class SimulationDto {
 
 @JsonSerializable()
 class AgentJourneyDto {
-  @JsonKey(name: "agent")
+  @JsonKey(name: "agent", fromJson: _agent)
   AgentDto agent;
-  @JsonKey(name: "reactions")
+  @JsonKey(name: "reactions", fromJson: _reactions)
   List<ReactionDto> reactions;
-  @JsonKey(name: "final_outcome")
+  @JsonKey(name: "final_outcome", fromJson: jsonString)
   String finalOutcome;
-  @JsonKey(name: "dropped_at_stage")
+  @JsonKey(name: "dropped_at_stage", fromJson: jsonStringOrNull)
   String? droppedAtStage;
 
   AgentJourneyDto({
@@ -99,33 +108,31 @@ class AgentJourneyDto {
 
 @JsonSerializable()
 class AgentDto {
-  @JsonKey(name: "id")
+  @JsonKey(name: "id", fromJson: jsonString)
   String id;
-  @JsonKey(name: "name")
+  @JsonKey(name: "name", fromJson: jsonString)
   String name;
-  @JsonKey(name: "age")
+  @JsonKey(name: "age", fromJson: jsonInt)
   int age;
-  @JsonKey(name: "gender")
+  @JsonKey(name: "gender", fromJson: jsonString)
   String gender;
-  @JsonKey(name: "location")
+  @JsonKey(name: "location", fromJson: jsonString)
   String location;
-  @JsonKey(name: "income_bracket")
+  @JsonKey(name: "income_bracket", fromJson: jsonString)
   String incomeBracket;
-  @JsonKey(name: "decision_style")
+  @JsonKey(name: "decision_style", fromJson: jsonString)
   String decisionStyle;
-  @JsonKey(name: "friction_threshold")
+  @JsonKey(name: "friction_threshold", fromJson: jsonInt)
   int frictionThreshold;
-  @JsonKey(name: "backstory")
+  @JsonKey(name: "backstory", fromJson: jsonString)
   String backstory;
-  @JsonKey(name: "ocean")
+  @JsonKey(name: "ocean", fromJson: _ocean)
   OceanDto ocean;
-  @JsonKey(name: "status_quo_tendency")
+  @JsonKey(name: "status_quo_tendency", fromJson: jsonDouble)
   double statusQuoTendency;
-  // @JsonKey(name: "context_attributes")
-  // ContextAttributesDto contextAttributes;
-  @JsonKey(name: "trigger_sensitivities")
+  @JsonKey(name: "trigger_sensitivities", fromJson: _triggers)
   TriggerSensitivitiesDto triggerSensitivities;
-  @JsonKey(name: "lifestyle_notes")
+  @JsonKey(name: "lifestyle_notes", fromJson: jsonString)
   String lifestyleNotes;
 
   AgentDto({
@@ -140,10 +147,10 @@ class AgentDto {
     required this.backstory,
     required this.ocean,
     required this.statusQuoTendency,
-    // required this.contextAttributes,
     required this.triggerSensitivities,
     required this.lifestyleNotes,
   });
+
   Agent toDto() {
     return Agent(
       id: id,
@@ -157,7 +164,6 @@ class AgentDto {
       backstory: backstory,
       ocean: ocean.toDto(),
       statusQuoTendency: statusQuoTendency,
-      // contextAttributes: contextAttributes.toDto(),
       triggerSensitivities: triggerSensitivities.toDto(),
       lifestyleNotes: lifestyleNotes,
     );
@@ -169,162 +175,17 @@ class AgentDto {
   Map<String, dynamic> toJson() => _$AgentDtoToJson(this);
 }
 
-// @JsonSerializable()
-// class ContextAttributesDto {
-//   @JsonKey(name: "cooking_confidence")
-//   AuthenticityImportanceDto cookingConfidence;
-//   @JsonKey(name: "spice_tolerance")
-//   AuthenticityImportanceDto spiceTolerance;
-//   @JsonKey(name: "time_availability")
-//   AuthenticityImportanceDto timeAvailability;
-//   @JsonKey(name: "authenticity_importance")
-//   AuthenticityImportanceDto authenticityImportance;
-
-//   ContextAttributesDto({
-//     required this.cookingConfidence,
-//     required this.spiceTolerance,
-//     required this.timeAvailability,
-//     required this.authenticityImportance,
-//   });
-
-//   ContextAttributes toDto() {
-//     return ContextAttributes(
-//       cookingConfidence: cookingConfidence.toDto(),
-//       spiceTolerance: spiceTolerance.toDto(),
-//       timeAvailability: timeAvailability.toDto(),
-//       authenticityImportance: authenticityImportance.toDto(),
-//     );
-//   }
-
-//   factory ContextAttributesDto.fromJson(Map<String, dynamic> json) =>
-//       _$ContextAttributesDtoFromJson(json);
-
-//   Map<String, dynamic> toJson() => _$ContextAttributesDtoToJson(this);
-// }
-
-// enum AuthenticityImportanceDto {
-//   @JsonValue("high")
-//   HIGH,
-//   @JsonValue("low")
-//   LOW,
-//   @JsonValue("moderate")
-//   MODERATE,
-// }
-
-// extension on AuthenticityImportanceDto {
-//   AuthenticityImportance toDto() {
-//     switch (this) {
-//       case AuthenticityImportanceDto.HIGH:
-//         return AuthenticityImportance.HIGH;
-//       case AuthenticityImportanceDto.LOW:
-//         return AuthenticityImportance.LOW;
-//       case AuthenticityImportanceDto.MODERATE:
-//         return AuthenticityImportance.MODERATE;
-//     }
-//   }
-// }
-
-// final authenticityImportanceValues = EnumValues({
-//   "high": AuthenticityImportanceDto.HIGH,
-//   "low": AuthenticityImportanceDto.LOW,
-//   "moderate": AuthenticityImportanceDto.MODERATE,
-// });
-
-// enum DecisionStyleDto {
-//   @JsonValue("analytical")
-//   ANALYTICAL,
-//   @JsonValue("deliberate")
-//   DELIBERATE,
-//   @JsonValue("impulsive")
-//   IMPULSIVE,
-// }
-
-// extension on DecisionStyleDto {
-//   DecisionStyle toDto() {
-//     switch (this) {
-//       case DecisionStyleDto.ANALYTICAL:
-//         return DecisionStyle.ANALYTICAL;
-//       case DecisionStyleDto.DELIBERATE:
-//         return DecisionStyle.DELIBERATE;
-//       case DecisionStyleDto.IMPULSIVE:
-//         return DecisionStyle.IMPULSIVE;
-//     }
-//   }
-// }
-
-// final decisionStyleValues = EnumValues({
-//   "analytical": DecisionStyleDto.ANALYTICAL,
-//   "deliberate": DecisionStyleDto.DELIBERATE,
-//   "impulsive": DecisionStyleDto.IMPULSIVE,
-// });
-
-// enum GenderDto {
-//   @JsonValue("female")
-//   FEMALE,
-//   @JsonValue("male")
-//   MALE,
-//   @JsonValue("non-binary")
-//   NON_BINARY,
-// }
-
-// extension on GenderDto {
-//   Gender toDto() {
-//     switch (this) {
-//       case GenderDto.FEMALE:
-//         return Gender.FEMALE;
-//       case GenderDto.MALE:
-//         return Gender.MALE;
-//       case GenderDto.NON_BINARY:
-//         return Gender.NON_BINARY;
-//       }
-//   }
-// }
-
-// final genderValues = EnumValues({
-//   "female": GenderDto.FEMALE,
-//   "male": GenderDto.MALE,
-//   "non-binary": GenderDto.NON_BINARY,
-// });
-
-// enum IncomeBracketDto {
-//   @JsonValue("high")
-//   HIGH,
-//   @JsonValue("low")
-//   LOW,
-//   @JsonValue("middle")
-//   MIDDLE,
-// }
-
-// extension on IncomeBracketDto {
-//   IncomeBracket toDto() {
-//     switch (this) {
-//       case IncomeBracketDto.HIGH:
-//         return IncomeBracket.HIGH;
-//       case IncomeBracketDto.LOW:
-//         return IncomeBracket.LOW;
-//       case IncomeBracketDto.MIDDLE:
-//         return IncomeBracket.MIDDLE;
-//     }
-//   }
-// }
-
-// final incomeBracketValues = EnumValues({
-//   "high": IncomeBracketDto.HIGH,
-//   "low": IncomeBracketDto.LOW,
-//   "middle": IncomeBracketDto.MIDDLE,
-// });
-
 @JsonSerializable()
 class OceanDto {
-  @JsonKey(name: "openness")
+  @JsonKey(name: "openness", fromJson: jsonDouble)
   double openness;
-  @JsonKey(name: "conscientiousness")
+  @JsonKey(name: "conscientiousness", fromJson: jsonDouble)
   double conscientiousness;
-  @JsonKey(name: "extraversion")
+  @JsonKey(name: "extraversion", fromJson: jsonDouble)
   double extraversion;
-  @JsonKey(name: "agreeableness")
+  @JsonKey(name: "agreeableness", fromJson: jsonDouble)
   double agreeableness;
-  @JsonKey(name: "neuroticism")
+  @JsonKey(name: "neuroticism", fromJson: jsonDouble)
   double neuroticism;
 
   OceanDto({
@@ -353,17 +214,17 @@ class OceanDto {
 
 @JsonSerializable()
 class TriggerSensitivitiesDto {
-  @JsonKey(name: "unexpected_cost")
+  @JsonKey(name: "unexpected_cost", fromJson: jsonDouble)
   double unexpectedCost;
-  @JsonKey(name: "trust_violation")
+  @JsonKey(name: "trust_violation", fromJson: jsonDouble)
   double trustViolation;
-  @JsonKey(name: "cognitive_load")
+  @JsonKey(name: "cognitive_load", fromJson: jsonDouble)
   double cognitiveLoad;
-  @JsonKey(name: "effort_cost")
+  @JsonKey(name: "effort_cost", fromJson: jsonDouble)
   double effortCost;
-  @JsonKey(name: "value_mismatch")
+  @JsonKey(name: "value_mismatch", fromJson: jsonDouble)
   double valueMismatch;
-  @JsonKey(name: "status_quo_inertia")
+  @JsonKey(name: "status_quo_inertia", fromJson: jsonDouble)
   double statusQuoInertia;
 
   TriggerSensitivitiesDto({
@@ -392,61 +253,23 @@ class TriggerSensitivitiesDto {
   Map<String, dynamic> toJson() => _$TriggerSensitivitiesDtoToJson(this);
 }
 
-// enum FinalOutcomeDto {
-//   @JsonValue("continuing")
-//   CONTINUING,
-//   @JsonValue("converted")
-//   CONVERTED,
-//   @JsonValue("delaying")
-//   DELAYING,
-//   @JsonValue("dropped")
-//   DROPPED,
-//   @JsonValue("frustrated")
-//   FRUSTRATED,
-// }
-
-// extension on FinalOutcomeDto {
-//   FinalOutcome toDto() {
-//     switch (this) {
-//       case FinalOutcomeDto.CONTINUING:
-//         return FinalOutcome.CONTINUING;
-//       case FinalOutcomeDto.CONVERTED:
-//         return FinalOutcome.CONVERTED;
-//       case FinalOutcomeDto.DELAYING:
-//         return FinalOutcome.DELAYING;
-//       case FinalOutcomeDto.DROPPED:
-//         return FinalOutcome.DROPPED;
-//       case FinalOutcomeDto.FRUSTRATED:
-//         return FinalOutcome.FRUSTRATED;
-//     }
-//   }
-// }
-
-// final finalOutcomeValues = EnumValues({
-//   "continuing": FinalOutcomeDto.CONTINUING,
-//   "converted": FinalOutcomeDto.CONVERTED,
-//   "delaying": FinalOutcomeDto.DELAYING,
-//   "dropped": FinalOutcomeDto.DROPPED,
-//   "frustrated": FinalOutcomeDto.FRUSTRATED,
-// });
-
 @JsonSerializable()
 class ReactionDto {
-  @JsonKey(name: "stage_order")
+  @JsonKey(name: "stage_order", fromJson: jsonInt)
   int stageOrder;
-  @JsonKey(name: "stage_name")
+  @JsonKey(name: "stage_name", fromJson: jsonString)
   String stageName;
-  @JsonKey(name: "behaviour")
+  @JsonKey(name: "behaviour", fromJson: jsonString)
   String behaviour;
-  @JsonKey(name: "internal_monologue")
+  @JsonKey(name: "internal_monologue", fromJson: jsonString)
   String internalMonologue;
-  @JsonKey(name: "friction_triggered")
+  @JsonKey(name: "friction_triggered", fromJson: jsonStringOrNull)
   String? frictionTriggered;
-  @JsonKey(name: "friction_cost")
+  @JsonKey(name: "friction_cost", fromJson: jsonInt)
   int frictionCost;
-  @JsonKey(name: "remaining_threshold")
+  @JsonKey(name: "remaining_threshold", fromJson: jsonInt)
   int remainingThreshold;
-  @JsonKey(name: "what_would_change_this")
+  @JsonKey(name: "what_would_change_this", fromJson: jsonStringOrNull)
   String? whatWouldChangeThis;
 
   ReactionDto({
@@ -479,50 +302,17 @@ class ReactionDto {
   Map<String, dynamic> toJson() => _$ReactionDtoToJson(this);
 }
 
-// enum TopFrictionTriggerDto {
-//   @JsonValue("cognitive_load")
-//   COGNITIVE_LOAD,
-//   @JsonValue("status_quo_inertia")
-//   STATUS_QUO_INERTIA,
-//   @JsonValue("unexpected_cost")
-//   UNEXPECTED_COST,
-//   @JsonValue("value_mismatch")
-//   VALUE_MISMATCH,
-// }
-
-// extension on TopFrictionTriggerDto {
-//   TopFrictionTrigger toDto() {
-//     switch (this) {
-//       case TopFrictionTriggerDto.COGNITIVE_LOAD:
-//         return TopFrictionTrigger.COGNITIVE_LOAD;
-//       case TopFrictionTriggerDto.STATUS_QUO_INERTIA:
-//         return TopFrictionTrigger.STATUS_QUO_INERTIA;
-//       case TopFrictionTriggerDto.UNEXPECTED_COST:
-//         return TopFrictionTrigger.UNEXPECTED_COST;
-//       case TopFrictionTriggerDto.VALUE_MISMATCH:
-//         return TopFrictionTrigger.VALUE_MISMATCH;
-//     }
-//   }
-// }
-
-// final topFrictionTriggerValues = EnumValues({
-//   "cognitive_load": TopFrictionTriggerDto.COGNITIVE_LOAD,
-//   "status_quo_inertia": TopFrictionTriggerDto.STATUS_QUO_INERTIA,
-//   "unexpected_cost": TopFrictionTriggerDto.UNEXPECTED_COST,
-//   "value_mismatch": TopFrictionTriggerDto.VALUE_MISMATCH,
-// });
-
 @JsonSerializable()
 class StageInsightDto {
-  @JsonKey(name: "stage_name")
+  @JsonKey(name: "stage_name", fromJson: jsonString)
   String stageName;
-  @JsonKey(name: "dropout_rate")
+  @JsonKey(name: "dropout_rate", fromJson: jsonDouble)
   double dropoutRate;
-  @JsonKey(name: "delay_rate")
+  @JsonKey(name: "delay_rate", fromJson: jsonDouble)
   double delayRate;
-  @JsonKey(name: "top_friction_trigger")
+  @JsonKey(name: "top_friction_trigger", fromJson: jsonStringOrNull)
   String? topFrictionTrigger;
-  @JsonKey(name: "confusion_rate")
+  @JsonKey(name: "confusion_rate", fromJson: jsonInt)
   int confusionRate;
 
   StageInsightDto({
@@ -547,16 +337,4 @@ class StageInsightDto {
       _$StageInsightDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$StageInsightDtoToJson(this);
-}
-
-class EnumValues<T> {
-  Map<String, T> map;
-  late Map<T, String> reverseMap;
-
-  EnumValues(this.map);
-
-  Map<T, String> get reverse {
-    reverseMap = map.map((k, v) => MapEntry(v, k));
-    return reverseMap;
-  }
 }

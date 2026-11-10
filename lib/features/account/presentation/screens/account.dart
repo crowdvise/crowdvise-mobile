@@ -1,7 +1,9 @@
-import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
+import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
+import 'package:crowdvise/core/presentation/utils/responsive.dart';
+import 'package:crowdvise/core/presentation/widgets/page_header.dart';
 import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
 import 'package:crowdvise/features/account/presentation/manager/account_provider.dart';
-import 'package:crowdvise/features/auth/presentation/screens/login.dart';
+import 'package:crowdvise/features/landing/presentation/screens/landing_screen.dart';
 import 'package:crowdvise/features/session/presentation/manager/session_provider.dart';
 import 'package:crowdvise/features/history/presentation/manager/history_provider.dart';
 import 'package:flutter/material.dart';
@@ -13,140 +15,136 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = Responsive.isDesktop(context);
+    final pad = isDesktop ? 32.0 : 20.0;
+
     return ProviderWidget(
       provider: AccountProvider(),
-      appBarTitle: 'Account',
+      padding: pad,
       children: (provider, theme) {
         final userModel = provider.state.userModel;
 
-        String fullName = 'Guest User';
+        String fullName = 'Guest';
         String initial = 'G';
-
-        if (userModel != null) {
-          final email = userModel.email;
-          if (email.isNotEmpty) {
-            final namePart = email.split('@').first;
-            fullName = namePart;
-            initial = namePart[0].toUpperCase();
-          }
+        if (userModel != null && userModel.email.isNotEmpty) {
+          final namePart = userModel.email.split('@').first;
+          fullName = namePart;
+          initial = namePart[0].toUpperCase();
         }
 
         return [
-          const Gap(40),
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: Column(
-                children: [
-                  // Profile Card
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF131314),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 72,
-                          height: 72,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF5B7FFF).withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            initial,
-                            style: theme.textTheme.displayLarge?.copyWith(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF5B7FFF),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: EdgeInsets.only(top: isDesktop ? 28 : 16, bottom: 40),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1120),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const PageHeader(
+                        eyebrow: 'Workspace',
+                        title: 'Account',
+                      ),
+                      const Gap(24),
+                      _Section(
+                        title: 'Profile',
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: signal.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                initial,
+                                style: const TextStyle(
+                                  fontFamily: 'Syne',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: signal,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const Gap(20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                fullName,
-                                style: theme.textTheme.displayLarge?.copyWith(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const Gap(4),
-                              Text(
-                                userModel?.email ?? 'No email',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontSize: 14,
-                                  color: Colors.white54,
-                                ),
-                              ),
-                              const Gap(8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white10,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  (userModel?.role ?? 'User').toUpperCase(),
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white70,
-                                    letterSpacing: 1.0,
+                            const Gap(14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    fullName,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: textPrimary,
+                                    ),
                                   ),
+                                  const Gap(2),
+                                  Text(
+                                    userModel?.email ?? 'Not signed in',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: wsCardHover,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: hairline),
+                              ),
+                              child: Text(
+                                (userModel?.role ?? 'User'),
+                                style: const TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: textSecondary,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  const Gap(40),
-                  // Settings / Logout List
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF131314),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white10),
-                    ),
-                    child: Column(
-                      children: [
-                        _buildActionRow(
-                          icon: Icons.logout,
-                          label: 'Log out',
-                          color: const Color(0xFFF24968),
-                          onTap: () async {
-                            await provider.logout();
-                            if (context.mounted) {
+                      ),
+                      const Gap(16),
+                      _Section(
+                        title: 'Session',
+                        padding: EdgeInsets.zero,
+                        child: _Row(
+                          label: 'Sign out',
+                          description: 'You’ll return to the Crowdvise home page.',
+                          trailing: ToolbarButton(
+                            label: 'Sign out',
+                            primary: false,
+                            onTap: () async {
+                              await provider.logout();
+                              if (!context.mounted) return;
                               try {
                                 context.read<SessionProvider>().reset();
                                 context.read<HistoryProvider>().reset();
                               } catch (_) {}
-                              
-                              // Use rootNavigator: true to ensure the dashboard shell is discarded
-                              Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
-                                LoginScreen.id,
+                              Navigator.of(context, rootNavigator: true)
+                                  .pushNamedAndRemoveUntil(
+                                LandingScreen.id,
                                 (route) => false,
                               );
-                            }
-                          },
-                          showDivider: false,
+                            },
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -154,41 +152,85 @@ class AccountScreen extends StatelessWidget {
       },
     );
   }
+}
 
-  Widget _buildActionRow({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-    bool showDivider = true,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
+class _Section extends StatelessWidget {
+  const _Section({
+    required this.title,
+    required this.child,
+    this.padding = const EdgeInsets.all(18),
+  });
+  final String title;
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: textSecondary,
+          ),
+        ),
+        const Gap(10),
+        Container(
+          width: double.infinity,
+          padding: padding,
+          decoration: BoxDecoration(
+            color: wsCard,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: hairline),
+          ),
+          child: child,
+        ),
+      ],
+    );
+  }
+}
+
+class _Row extends StatelessWidget {
+  const _Row({
+    required this.label,
+    required this.description,
+    required this.trailing,
+  });
+  final String label;
+  final String description;
+  final Widget trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(18),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, color: color, size: 22),
-                const Gap(16),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: color,
-                    ),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: textPrimary,
                   ),
                 ),
-                Icon(Icons.arrow_forward_ios, color: Colors.white24, size: 14),
+                const Gap(2),
+                Text(
+                  description,
+                  style: const TextStyle(fontSize: 12.5, color: textTertiary),
+                ),
               ],
             ),
           ),
-          if (showDivider)
-            const Divider(color: Colors.white10, height: 1, indent: 56),
+          const Gap(16),
+          trailing,
         ],
       ),
     );

@@ -42,7 +42,7 @@ extension Snackbar on State {
   }
 }
 
-customToast(String message, [type = 1]) {
+ToastificationItem customToast(String message, [type = 1]) {
   final IconData icon;
   final String title;
   final Color bgColor;

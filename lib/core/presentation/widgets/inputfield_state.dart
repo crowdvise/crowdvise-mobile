@@ -44,7 +44,7 @@ abstract class TextFieldState<T extends TextFieldParent> extends CustomState<T> 
     super.onStarted();
   }
 
-  _onFocusChange() {
+  void _onFocusChange() {
     setState(() {
       isFocus = focus.hasFocus;
     });

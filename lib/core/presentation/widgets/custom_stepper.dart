@@ -1,3 +1,4 @@
+import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -11,10 +12,11 @@ class CustomStep {
     required this.title,
     required this.content,
     this.isActive = true,
-    this.connectorColor = const Color(0xFF5B7FFF),
+    this.connectorColor = signal,
   });
 }
 
+/// Vertical timeline. Plain Column — no nested ListView inside a scroll view.
 class CustomStepper extends StatelessWidget {
   final List<CustomStep> steps;
 
@@ -22,62 +24,55 @@ class CustomStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: steps.length,
-      itemBuilder: (context, index) {
-        final step = steps[index];
-        final isLast = index == steps.length - 1;
-
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Indicator & Vertical Line
-              Column(
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    margin: const EdgeInsets.only(top: 4),
-                    decoration: BoxDecoration(
-                      color: step.isActive ? step.connectorColor : Colors.transparent,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: step.isActive ? step.connectorColor : Colors.white30,
-                        width: 2,
+    return Column(
+      children: [
+        for (var i = 0; i < steps.length; i++)
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  width: 16,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        margin: const EdgeInsets.only(top: 5),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: steps[i].isActive
+                              ? steps[i].connectorColor
+                              : Colors.transparent,
+                          border: Border.all(
+                            color: steps[i].isActive
+                                ? steps[i].connectorColor
+                                : hairlineStrong,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: step.isActive
-                        ? const Icon(Icons.check, size: 14, color: Colors.white)
-                        : null,
+                      if (i != steps.length - 1)
+                        const Expanded(
+                          child: VerticalDivider(width: 1, color: hairlineStrong),
+                        ),
+                    ],
                   ),
-                  if (!isLast)
-                    Expanded(
-                      child: Container(
-                        width: 2,
-                        color: step.connectorColor,
-                      ),
-                    ),
-                ],
-              ),
-              const Gap(16),
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    step.title,
-                    step.content,
-                    if (!isLast) const Gap(32),
-                  ],
                 ),
-              ),
-            ],
+                const Gap(12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      steps[i].title,
+                      steps[i].content,
+                      if (i != steps.length - 1) const Gap(18),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        );
-      },
+      ],
     );
   }
 }

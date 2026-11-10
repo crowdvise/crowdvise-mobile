@@ -1,8 +1,9 @@
+import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
+import 'package:crowdvise/core/presentation/widgets/field_label.dart';
 import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
-import 'package:crowdvise/core/presentation/widgets/scrollable_widget.dart';
 import 'package:crowdvise/features/insights/presentation/manager/insights_provider.dart';
+import 'package:crowdvise/features/insights/presentation/widgets/behaviour_tone.dart';
 import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
-import 'package:crowdvise/core/presentation/widgets/custom_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -16,62 +17,74 @@ class ReactionDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ProviderWidget(
-      appBarTitle: 'Reaction Details',
+      appBarTitle: 'Reaction',
+      leading: true,
+      padding: 0,
       provider: InsightsProvider(),
       children: (provider, theme) {
-        return [ReactionDetailBody(journey: journey)];
+        return [
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 820),
+                  child: ReactionDetailBody(journey: journey),
+                ),
+              ),
+            ),
+          ),
+        ];
       },
     );
   }
 }
 
+/// Non-scrolling body so it can live inside either the standalone screen or
+/// the desktop split pane.
 class ReactionDetailBody extends StatelessWidget {
   final AgentJourney journey;
   const ReactionDetailBody({super.key, required this.journey});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final agent = journey.agent;
+    final a = journey.agent;
+    final outcome = BehaviourTone.of(journey.finalOutcome);
 
-    return ScrollableWidget(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Gap(16),
-        // Agent Info
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: const Color(0xFF4285F4),
-              child: Text(
-                agent.name.isNotEmpty ? agent.name[0].toUpperCase() : '?',
-                style: theme.textTheme.displayMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const Gap(16),
+            InitialAvatar(a.name, size: 44),
+            const Gap(14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${agent.name}, ${agent.age}',
-                    style: theme.textTheme.displayMedium?.copyWith(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                    '${a.name}, ${a.age}',
+                    style: const TextStyle(
+                      fontFamily: 'Syne',
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: textPrimary,
+                      height: 1.1,
                     ),
                   ),
-                  const Gap(4),
-                  Text(
-                    '${agent.location} • Final Outcome: ${journey.finalOutcome.toUpperCase()}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
+                  const Gap(6),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _Meta(a.location),
+                      _Meta(a.incomeBracket),
+                      _Meta(_title(a.decisionStyle)),
+                      TonePill(outcome),
+                    ],
                   ),
                 ],
               ),
@@ -79,258 +92,136 @@ class ReactionDetailBody extends StatelessWidget {
           ],
         ),
         const Gap(24),
-        // Backstory & Traits
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF131314),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white10),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Backstory',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const Gap(8),
-              Text(
-                agent.backstory,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: 14,
-                  color: Colors.white70,
-                  height: 1.5,
-                ),
-              ),
-              const Gap(16),
-              const Divider(color: Colors.white10),
-              const Gap(16),
-              Text(
-                'Personality Traits (Ocean)',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const Gap(8),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  _TraitBadge('Openness', agent.ocean.openness, theme),
-                  _TraitBadge(
-                    'Conscientiousness',
-                    agent.ocean.conscientiousness,
-                    theme,
-                  ),
-                  _TraitBadge('Extraversion', agent.ocean.extraversion, theme),
-                  _TraitBadge(
-                    'Agreeableness',
-                    agent.ocean.agreeableness,
-                    theme,
-                  ),
-                  _TraitBadge('Neuroticism', agent.ocean.neuroticism, theme),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const Gap(32),
-        Text(
-          'Journey Timeline',
-          style: theme.textTheme.displaySmall?.copyWith(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: Colors.white,
-          ),
-        ),
-        const Gap(16),
-        // Timeline using Stepper
-        if (journey.reactions.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Text(
-              'No reactions recorded.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.white54,
+        _Card(
+          children: [
+            const SectionTitle('Who they are'),
+            const Gap(8),
+            Text(
+              a.backstory,
+              style: const TextStyle(
+                fontSize: 13.5,
+                color: textSecondary,
+                height: 1.55,
               ),
             ),
+            const Gap(16),
+            const Divider(height: 1, color: hairline),
+            const Gap(14),
+            Row(
+              children: [
+                const Expanded(child: SectionTitle('Personality')),
+                Text(
+                  'Friction threshold ${a.frictionThreshold}',
+                  style: const TextStyle(fontSize: 12, color: textTertiary),
+                ),
+              ],
+            ),
+            const Gap(12),
+            _Trait('Openness', a.ocean.openness),
+            _Trait('Conscientiousness', a.ocean.conscientiousness),
+            _Trait('Extraversion', a.ocean.extraversion),
+            _Trait('Agreeableness', a.ocean.agreeableness),
+            _Trait('Neuroticism', a.ocean.neuroticism, last: true),
+          ],
+        ),
+        const Gap(28),
+        const SectionTitle('Journey'),
+        const Gap(12),
+        if (journey.reactions.isEmpty)
+          const Text(
+            'No reactions recorded.',
+            style: TextStyle(color: textTertiary, fontSize: 13),
           )
         else
-          CustomStepper(
-            steps: journey.reactions.map((reaction) {
-              Color behaviorColor = _getBehaviorColor(reaction.behaviour);
-              return CustomStep(
-                connectorColor: behaviorColor,
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        reaction.stageName,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: behaviorColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        reaction.behaviour.toUpperCase(),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: behaviorColor,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                content: Container(
-                  margin: const EdgeInsets.only(top: 8, bottom: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1E),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '"${reaction.internalMonologue}"',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontStyle: FontStyle.italic,
-                          color: Colors.white70,
-                          height: 1.5,
-                        ),
-                      ),
-                      if (reaction.frictionTriggered != null &&
-                          reaction.frictionTriggered!.isNotEmpty &&
-                          reaction.frictionTriggered != 'null') ...[
-                        const Gap(12),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.warning_amber_rounded,
-                              size: 16,
-                              color: Color(0xFFF3B70F),
-                            ),
-                            const Gap(8),
-                            Expanded(
-                              child: Text(
-                                'Friction: ${reaction.frictionTriggered}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: const Color(0xFFF3B70F),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ] else ...[
-                        const SizedBox.shrink(),
-                      ],
-                      if (reaction.whatWouldChangeThis != null &&
-                          reaction.whatWouldChangeThis!.isNotEmpty &&
-                          reaction.whatWouldChangeThis != 'null') ...[
-                        const Gap(8),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.lightbulb_outline,
-                              size: 16,
-                              color: Color(0xFF4285F4),
-                            ),
-                            const Gap(8),
-                            Expanded(
-                              child: Text(
-                                'Fix: ${reaction.whatWouldChangeThis}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: const Color(0xFF4285F4),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                isActive: true,
-              );
-            }).toList(),
-          ),
-
-          
-        const Gap(40),
+          for (var i = 0; i < journey.reactions.length; i++)
+            _Step(
+              reaction: journey.reactions[i],
+              last: i == journey.reactions.length - 1,
+            ),
       ],
     );
   }
-
-  Color _getBehaviorColor(String behavior) {
-    switch (behavior.toLowerCase()) {
-      case 'converted':
-        return const Color(0xFF0FBC73);
-      case 'continuing':
-        return const Color(0xFF8B5CF6);
-      case 'dropped':
-      case 'frustrated':
-        return const Color(0xFFF24968);
-      case 'delaying':
-        return const Color(0xFFF3B70F);
-      case 'confused':
-        return const Color(0xFF4285F4);
-      default:
-        return Colors.grey;
-    }
-  }
 }
 
-class _TraitBadge extends StatelessWidget {
-  final String label;
-  final double value;
-  final ThemeData theme;
-
-  const _TraitBadge(this.label, this.value, this.theme);
+class _Card extends StatelessWidget {
+  const _Card({required this.children});
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10),
+        color: wsCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: hairline),
       ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+    );
+  }
+}
+
+class _Meta extends StatelessWidget {
+  const _Meta(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: const TextStyle(fontSize: 12.5, color: textTertiary));
+  }
+}
+
+class _Trait extends StatelessWidget {
+  const _Trait(this.label, this.value, {this.last = false});
+  final String label;
+  final double value;
+  final bool last;
+
+  @override
+  Widget build(BuildContext context) {
+    final v = (value <= 1 ? value : value / 10).clamp(0.0, 1.0);
+    return Padding(
+      padding: EdgeInsets.only(bottom: last ? 0 : 8),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+          SizedBox(
+            width: 130,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 12.5, color: textSecondary),
+            ),
           ),
-          const Gap(8),
-          Text(
-            (value * 10).toStringAsFixed(1),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: SizedBox(
+                height: 4,
+                child: Stack(
+                  children: [
+                    const ColoredBox(color: hairline, child: SizedBox.expand()),
+                    FractionallySizedBox(
+                      widthFactor: v,
+                      child: const ColoredBox(
+                        color: textSecondary,
+                        child: SizedBox.expand(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const Gap(12),
+          SizedBox(
+            width: 28,
+            child: Text(
+              (v * 10).toStringAsFixed(1),
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: textPrimary,
+              ),
             ),
           ),
         ],
@@ -338,3 +229,148 @@ class _TraitBadge extends StatelessWidget {
     );
   }
 }
+
+class _Step extends StatelessWidget {
+  const _Step({required this.reaction, required this.last});
+  final Reaction reaction;
+  final bool last;
+
+  bool _has(String? s) => s != null && s.trim().isNotEmpty && s != 'null';
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = BehaviourTone.of(reaction.behaviour);
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 16,
+            child: Column(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  margin: const EdgeInsets.only(top: 5),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: tone.color,
+                  ),
+                ),
+                if (!last)
+                  const Expanded(
+                    child: VerticalDivider(width: 1, color: hairlineStrong),
+                  ),
+              ],
+            ),
+          ),
+          const Gap(12),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: last ? 0 : 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _title(reaction.stageName),
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            color: textPrimary,
+                          ),
+                        ),
+                      ),
+                      TonePill(tone),
+                    ],
+                  ),
+                  const Gap(8),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: wsCard,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: hairline),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '“${reaction.internalMonologue.trim()}”',
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            color: textSecondary,
+                            height: 1.5,
+                          ),
+                        ),
+                        if (_has(reaction.frictionTriggered)) ...[
+                          const Gap(10),
+                          _Note(
+                            label: 'Friction',
+                            text: reaction.frictionTriggered!,
+                            color: statusWarning,
+                            cost: reaction.frictionCost,
+                          ),
+                        ],
+                        if (_has(reaction.whatWouldChangeThis)) ...[
+                          const Gap(6),
+                          _Note(
+                            label: 'Would change this',
+                            text: reaction.whatWouldChangeThis!,
+                            color: signal,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Note extends StatelessWidget {
+  const _Note({
+    required this.label,
+    required this.text,
+    required this.color,
+    this.cost,
+  });
+  final String label, text;
+  final Color color;
+  final int? cost;
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(
+          fontFamily: 'PlusJakartaSans',
+          fontSize: 12.5,
+          height: 1.5,
+          color: textSecondary,
+        ),
+        children: [
+          TextSpan(
+            text: cost != null && cost! > 0 ? '$label (−$cost)  ' : '$label  ',
+            style: TextStyle(fontWeight: FontWeight.w700, color: color),
+          ),
+          TextSpan(text: text.trim()),
+        ],
+      ),
+    );
+  }
+}
+
+String _title(String s) => s
+    .replaceAll('_', ' ')
+    .split(' ')
+    .where((w) => w.isNotEmpty)
+    .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+    .join(' ');

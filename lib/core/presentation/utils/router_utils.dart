@@ -3,6 +3,7 @@ import 'package:crowdvise/features/auth/presentation/screens/register.dart';
 import 'package:crowdvise/features/insights/presentation/screens/full_insights.dart';
 import 'package:crowdvise/features/insights/presentation/screens/insights.dart';
 import 'package:crowdvise/features/insights/presentation/screens/live_reactions.dart';
+import 'package:crowdvise/features/landing/presentation/screens/landing_screen.dart';
 import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
 import 'package:crowdvise/features/session/presentation/screens/assembling_panel.dart';
 import 'package:crowdvise/features/session/presentation/screens/dashboard.dart';
@@ -21,6 +22,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _getPageRoute(
         routeName: settings.name,
         viewToShow: const SplashScreen(),
+      );
+
+    case LandingScreen.id:
+      return _getPageRoute(
+        routeName: settings.name,
+        viewToShow: const LandingScreen(),
       );
 
     case OnboardingScreen.id:

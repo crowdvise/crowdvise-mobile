@@ -52,6 +52,8 @@ class RunDto {
     int readinessScore;
     @JsonKey(name: "created_at")
     String createdAt;
+    @JsonKey(name: "experiment_id")
+    String? experimentId;
 
     RunDto({
         required this.id,
@@ -63,6 +65,7 @@ class RunDto {
         required this.overallDelayedRate,
         required this.readinessScore,
         required this.createdAt,
+        this.experimentId,
     });
 
     RunModel toDto(){
@@ -76,6 +79,7 @@ class RunDto {
         overallDelayedRate: overallDelayedRate,
         readinessScore: readinessScore,
         createdAt: createdAt,
+        experimentId: experimentId,
       );
     }
 

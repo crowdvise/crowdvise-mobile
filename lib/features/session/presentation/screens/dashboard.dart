@@ -1,7 +1,9 @@
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/core/presentation/utils/responsive.dart';
+import 'package:crowdvise/core/presentation/widgets/app_background.dart';
 import 'package:crowdvise/core/presentation/widgets/bottom_nav_bar.dart';
 import 'package:crowdvise/features/account/presentation/screens/account.dart';
+import 'package:crowdvise/features/history/presentation/manager/history_provider.dart';
 import 'package:crowdvise/features/history/presentation/screens/history.dart';
 import 'package:crowdvise/features/session/presentation/manager/dashboard_provider.dart';
 import 'package:crowdvise/features/session/presentation/screens/home.dart';
@@ -20,71 +22,73 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
+/// Switches the dashboard to [index] without a page transition and without
+/// rebuilding the tab's state. Pops any detail screens pushed on the inner
+/// navigator so the tab root is visible.
+void switchDashboardTab(BuildContext context, int index) {
+  try {
+    context.read<DashboardProvider>().updateIndex(index);
+  } catch (_) {
+    final inner = dashboardNavigatorKey.currentContext;
+    if (inner != null) {
+      Provider.of<DashboardProvider>(inner, listen: false).updateIndex(index);
+    }
+  }
+  dashboardNavigatorKey.currentState?.popUntil((r) => r.isFirst);
+
+  // Home and History read the shared provider; refresh when either becomes
+  // visible so a run completed elsewhere is reflected immediately.
+  if (index == 0 || index == 1) {
+    try {
+      context.read<HistoryProvider>().fetchHistory();
+    } catch (_) {
+      // Provider not mounted yet (e.g. during early navigation).
+    }
+  }
+}
+
 class _DashboardScreenState extends State<DashboardScreen> {
-  DashboardProvider? _provider;
-
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const HistoryScreen(),
-    const AccountScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => DashboardProvider(),
       child: Consumer<DashboardProvider>(
         builder: (context, provider, child) {
-          _provider ??= provider;
-          final state = provider;
           final isDesktop = Responsive.isDesktop(context);
 
           return Scaffold(
+            backgroundColor: wsCanvas,
             resizeToAvoidBottomInset: false,
-            body: Row(
-              children: [
-                if (isDesktop)
-                  ModernSidebar(
-                    selectedIndex: state.selectedIndex,
-                    onDestinationSelected: (index) {
-                      provider.updateIndex(index);
-                      // Force the inner navigator to replace its stack with the new tab's screen
-                      dashboardNavigatorKey.currentState?.pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (_) => _screens.elementAt(index),
-                        ),
-                        (route) => false,
-                      );
-                    },
+            body: AppBackground(
+              child: Row(
+                children: [
+                  if (isDesktop)
+                    ModernSidebar(
+                      selectedIndex: provider.selectedIndex,
+                      onDestinationSelected: (index) =>
+                          switchDashboardTab(context, index),
+                    ),
+                  Expanded(
+                    child: isDesktop
+                        ? Navigator(
+                            key: dashboardNavigatorKey,
+                            onGenerateRoute: (_) => PageRouteBuilder(
+                              pageBuilder: (_, _, _) => const _TabHost(),
+                              transitionDuration: Duration.zero,
+                              reverseTransitionDuration: Duration.zero,
+                            ),
+                          )
+                        : const _TabHost(),
                   ),
-                if (isDesktop)
-                  const VerticalDivider(
-                    width: .02,
-                    color: grey900,
-                  ),
-                Expanded(
-                  child: isDesktop
-                      // Desktop: nested navigator keeps sidebar visible
-                      ? Navigator(
-                          key: dashboardNavigatorKey,
-                          onGenerateRoute: (_) => MaterialPageRoute(
-                            builder: (_) =>
-                                _screens.elementAt(state.selectedIndex),
-                          ),
-                        )
-                      // Mobile: just show the screen directly
-                      : _screens.elementAt(state.selectedIndex),
-                ),
-              ],
+                ],
+              ),
             ),
             bottomNavigationBar: isDesktop
                 ? null
                 : BottomNavBar(
-                    selectedIndex: state.selectedIndex,
-                    currentIndex: state.selectedIndex,
-                    onTabSelected: (index) {
-                      provider.updateIndex(index);
-                    },
+                    selectedIndex: provider.selectedIndex,
+                    currentIndex: provider.selectedIndex,
+                    onTabSelected: (index) => switchDashboardTab(context, index),
                     items: [
                       for (final tabItem in BottomNavBarItem.items)
                         BottomNavBarItem(
@@ -96,6 +100,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+/// Root of the dashboard: all three tabs stay mounted so switching is
+/// instant and no tab refetches or re-animates.
+class _TabHost extends StatelessWidget {
+  const _TabHost();
+
+  @override
+  Widget build(BuildContext context) {
+    final index = context.select<DashboardProvider, int>((p) => p.selectedIndex);
+    return IndexedStack(
+      index: index,
+      children: const [HomeScreen(), HistoryScreen(), AccountScreen()],
     );
   }
 }

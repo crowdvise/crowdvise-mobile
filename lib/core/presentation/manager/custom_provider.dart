@@ -2,37 +2,61 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+/// Base provider with a lightweight event channel used by screens to react to
+/// one-off outcomes (navigate on success, show an error, ...).
+///
+/// Only the most recent [listen] subscriber receives events. Screens call
+/// [listen] in `onStarted`, so the subscribing screen is always the active
+/// one. Previous controllers are closed to avoid leaks.
 class CustomProvider extends ChangeNotifier {
-  StreamController? _stream;
+  StreamController<dynamic>? _stream;
   bool loading = false;
-  void listen(Function(dynamic) event){
-    _stream = StreamController();
-    _stream?.stream.listen(event);
+  bool _disposed = false;
+
+  StreamSubscription<dynamic> listen(Function(dynamic) event) {
+    _closeStream();
+    final controller = StreamController<dynamic>();
+    _stream = controller;
+    return controller.stream.listen(event);
   }
 
-  onLoad(){
+  void setLoading(bool value) {
+    if (loading == value || _disposed) return;
+    loading = value;
+    notifyListeners();
+  }
+
+  /// Legacy toggle. Prefer [setLoading] — toggling silently inverts state when
+  /// two requests overlap or a future fails before resetting.
+  void onLoad() {
     loading = !loading;
     notifyListeners();
   }
 
-  void close(){
-    _stream?.close();
-  }
-
-  void add(data){
-    if(data is String){
-      if(data.contains('ThrottlerException')){
-        return;
-      }
+  void _closeStream() {
+    final stream = _stream;
+    _stream = null;
+    if (stream != null && !stream.isClosed) {
+      stream.close();
     }
-    _stream?.add(data);
   }
 
-  bool _disposed = false;
+  void close() => _closeStream();
+
+  void add(dynamic data) {
+    if (data is String && data.contains('ThrottlerException')) {
+      return;
+    }
+    final stream = _stream;
+    if (stream != null && !stream.isClosed) {
+      stream.add(data);
+    }
+  }
 
   @override
   void dispose() {
     _disposed = true;
+    _closeStream();
     super.dispose();
   }
 

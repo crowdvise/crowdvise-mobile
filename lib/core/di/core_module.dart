@@ -7,6 +7,7 @@ import 'package:crowdvise/core/presentation/utils/custom_state.dart';
 import 'package:crowdvise/features/auth/presentation/screens/login.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,14 +25,18 @@ abstract class CoreModule {
         // sendTimeout: const Duration(seconds: 60),
       ),
     );
-    dio.interceptors.add(AwesomeDioInterceptor());
+    if (kDebugMode) {
+      dio.interceptors.add(AwesomeDioInterceptor());
+    }
 
     // Add Interceptor to handle token expiration
     dio.interceptors.add(
       InterceptorsWrapper(
         onError: (error, handler) {
-          if (error.response?.statusCode == 401 ||
-              error.response?.data['message'] == 'Unauthorized') {
+          final data = error.response?.data;
+          final isUnauthorizedMessage =
+              data is Map && data['message'] == 'Unauthorized';
+          if (error.response?.statusCode == 401 || isUnauthorizedMessage) {
             _handleTokenExpiration();
           }
           return handler.next(error);
@@ -47,28 +52,30 @@ abstract class CoreModule {
 
   //This function clears all stored user
   // preferences (excluding the onboarding key) and navigates to login screen
-  void _handleTokenExpiration() {
-    preferences().then((value) {
-      value.remove(user);
-      value.remove(tokenKey);
-      value.remove(currentEmail);
-      // value.remove(userRoleKey);
-      // value.remove(savedIds);
+  Future<void> _handleTokenExpiration() async {
+    accessToken = '';
+    userType = '';
+    currentRole = null;
+    final pref = await preferences();
+    await pref.remove(user);
+    await pref.remove(tokenKey);
+    await pref.remove(currentEmail);
+    await pref.remove(userRoleKey);
 
-      final context = navigator.currentState?.context;
-      if (context != null) {
-        try {
-          context.read<SessionProvider>().reset();
-          context.read<HistoryProvider>().reset();
-        } catch (e) {
-          // Ignore if provider is not found
-        }
-      }
+    final nav = navigator.currentState;
+    final context = nav?.context;
+    if (nav == null || context == null || !context.mounted) return;
 
-      navigator.currentState?.pushAndRemoveUntil(
-        CupertinoPageRoute(builder: (context) => LoginScreen()),
-        (route) => false,
-      );
-    });
+    try {
+      context.read<SessionProvider>().reset();
+      context.read<HistoryProvider>().reset();
+    } catch (_) {
+      // Ignore if the providers are not mounted.
+    }
+
+    nav.pushAndRemoveUntil(
+      CupertinoPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   }
 }

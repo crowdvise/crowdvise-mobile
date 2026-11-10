@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-abstract class CustomState<T extends StatefulWidget> extends State<T> with RouteAware, WidgetsBindingObserver{
+abstract class CustomState<T extends StatefulWidget>
+    extends State<T> with RouteAware, WidgetsBindingObserver {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      onStarted();
+      if (mounted) onStarted();
     });
     onStart();
     WidgetsBinding.instance.addObserver(this);
@@ -22,16 +23,17 @@ abstract class CustomState<T extends StatefulWidget> extends State<T> with Route
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    routeObserver.subscribe(this, ModalRoute.of(context)!);
+    final route = ModalRoute.of(context);
+    if (route != null) routeObserver.subscribe(this, route);
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed){
+    if (state == AppLifecycleState.resumed) {
       onResume();
     }
-    if(state == AppLifecycleState.paused){
+    if (state == AppLifecycleState.paused) {
       onPause();
     }
   }
@@ -47,16 +49,16 @@ abstract class CustomState<T extends StatefulWidget> extends State<T> with Route
     onPopNext();
     super.didPopNext();
   }
-  void onStarted(){}
-  void onStart(){}
-  void onResume(){}
-  void onPause(){}
-  void onPopNext(){}
-  void onDestroy(){}
 
-  void onPush(){}
+  void onStarted() {}
+  void onStart() {}
+  void onResume() {}
+  void onPause() {}
+  void onPopNext() {}
+  void onDestroy() {}
+
+  void onPush() {}
 }
-
 
 final routeObserver = RouteObserver<ModalRoute<void>>();
 final navigator = GlobalKey<NavigatorState>();

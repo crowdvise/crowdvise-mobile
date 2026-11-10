@@ -21,7 +21,7 @@ class AuthState {
       firstName: firstName,
       lastName: lastName,
       email: email,
-      password: confirmPassword,
+      password: password,
       industry: industry,
     );
   }

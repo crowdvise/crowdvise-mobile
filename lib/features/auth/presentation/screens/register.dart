@@ -1,5 +1,4 @@
 import 'package:crowdvise/core/presentation/res/drawables.dart';
-import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/core/presentation/utils/custom_state.dart';
 import 'package:crowdvise/core/presentation/utils/navigation_mixin.dart';
 import 'package:crowdvise/core/presentation/utils/responsive.dart';
@@ -7,12 +6,12 @@ import 'package:crowdvise/core/presentation/utils/snack_bar_utils.dart';
 import 'package:crowdvise/core/presentation/widgets/button.dart';
 import 'package:crowdvise/core/presentation/widgets/input_field.dart';
 import 'package:crowdvise/core/presentation/widgets/provider_widget.dart';
-import 'package:crowdvise/core/presentation/widgets/scrollable_widget.dart';
 import 'package:crowdvise/features/auth/domain/model/sign_up_model.dart';
 import 'package:crowdvise/features/auth/presentation/manager/auth_provider.dart';
 import 'package:crowdvise/features/auth/presentation/screens/login.dart';
+import 'package:crowdvise/features/auth/presentation/widgets/auth_layout.dart';
 import 'package:crowdvise/features/auth/presentation/widgets/email_confirmation_dialog.dart';
-import 'package:flutter/gestures.dart';
+import 'package:crowdvise/features/landing/presentation/screens/landing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -27,6 +26,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends CustomState<RegisterScreen> {
   AuthProvider? _provider;
+
   @override
   void onStarted() {
     _provider?.listen((event) {
@@ -52,289 +52,200 @@ class _RegisterScreenState extends CustomState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Only split names side-by-side when the form pane is genuinely wide.
+    final isWide = Responsive.isDesktop(context);
+
     return ProviderWidget(
       provider: AuthProvider(),
       children: (provider, theme) {
         _provider ??= provider;
         final state = provider.state;
-        final formContent = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Gap(24),
-            Text(
-              'Create\naccount',
-              style: theme.textTheme.displayLarge?.copyWith(
-                fontSize: 34,
-                fontWeight: FontWeight.w900,
-                height: 1.0,
-                color: Colors.white,
-              ),
-            ),
-            const Gap(12),
-            Text(
-              'Start testing your ideas today.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontSize: 16,
-                color: Colors.white60,
-              ),
-            ),
-            const Gap(40),
-            Text(
-              "FIRST NAME",
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: Colors.white54,
-                letterSpacing: 1.5,
-              ),
-            ),
-            const Gap(8),
-            InputField(
-              hint: 'First name',
-              prefix: icProfile,
-              value: state.firstName,
-              error: state.firstNameError,
-              inputType: TextInputType.text,
-              onChange: (value) {
-                provider.setFirstName(value);
-              },
-            ),
-            const Gap(24),
-            Text(
-              "LAST NAME",
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: Colors.white54,
-                letterSpacing: 1.5,
-              ),
-            ),
-            const Gap(8),
-            InputField(
-              hint: 'Last name',
-              prefix: icProfile,
-              value: state.lastName,
-              error: state.lastNameError,
-              inputType: TextInputType.text,
-              onChange: (value) {
-                provider.setLastName(value);
-              },
-            ),
-            const Gap(24),
-            Text(
-              "INDUSTRY",
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: Colors.white54,
-                letterSpacing: 1.5,
-              ),
-            ),
-            const Gap(8),
-            InputField(
-              hint: 'Industry',
-              prefix: briefcase,
-              value: state.industry,
-              error: state.industryError,
-              inputType: TextInputType.text,
-              onChange: (value) {
-                provider.setIndustry(value);
-              },
-            ),
-            const Gap(24),
 
-            Text(
-              "EMAIL",
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: Colors.white54,
-                letterSpacing: 1.5,
-              ),
-            ),
-            const Gap(8),
-            InputField(
-              hint: 'Email',
-              prefix: icEmail,
-              value: state.email,
-              error: state.emailError,
-              inputType: TextInputType.emailAddress,
-              onChange: (value) {
-                provider.setEmail(value);
-              },
-            ),
-
-            const Gap(24),
-            Text(
-              "PASSWORD",
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: Colors.white54,
-                letterSpacing: 1.5,
-              ),
-            ),
-            const Gap(8),
-            InputField(
-              hint: 'Password',
-              prefix: icPassword,
-              value: state.password,
-              error: state.passwordError,
-              inputType: TextInputType.visiblePassword,
-              isPassword: true,
-              onChange: (value) {
-                provider.setPassword(value);
-              },
-            ),
-            const Gap(24),
-            Text(
-              "CONFIRM PASSWORD",
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: Colors.white54,
-                letterSpacing: 1.5,
-              ),
-            ),
-            const Gap(8),
-            InputField(
-              hint: 'Confirm Password',
-              prefix: icPassword,
-              value: state.confirmPassword,
-              error: state.confirmPasswordError,
-              inputType: TextInputType.visiblePassword,
-              isPassword: true,
-              onChange: (value) {
-                provider.setConfirmPassword(value);
-              },
-            ),
-            const Gap(32),
-            Button(
-              title: 'Create account',
-              isEnabled: state.isValidated,
-              isLoading: provider.loading,
-              onPressed: () {
-                provider.register();
-              },
-            ),
-            const Gap(24),
-            Row(
-              children: [
-                const Expanded(child: Divider(color: Colors.white10)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'or',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white54,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const Expanded(child: Divider(color: Colors.white10)),
+        return [
+          Expanded(
+            child: AuthScreenLayout(
+              showBackButton: true,
+              onBack: () => context.pushNamedAndClear(LandingScreen.id),
+              heroTagline:
+                  'Join teams using AI personas to validate ideas before launch.',
+              heroPills: const [
+                'Free to start',
+                'No credit card',
+                'Setup in minutes',
               ],
-            ),
-            const Gap(32),
-            Center(
-              child: Text.rich(
-                TextSpan(
-                  text: 'Already have an account? ',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white54,
-                    fontSize: 15,
-                  ),
+              form: AuthFormCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextSpan(
-                      text: 'Log in',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: electricBlue,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                      ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          // Navigate to login
-                          context.push(const LoginScreen());
-                        },
+                    const AuthHeading(
+                      title: 'Create your account',
+                      subtitle:
+                          'Get started with synthetic customer panels in minutes.',
+                    ),
+                    const Gap(32),
+
+                    // Personal info section
+                    AuthFormSection(
+                      title: 'PERSONAL',
+                      children: [
+                        if (isWide)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: _NameField(
+                                  label: 'First name',
+                                  hint: 'Jane',
+                                  prefix: icProfile,
+                                  value: state.firstName,
+                                  error: state.firstNameError,
+                                  onChange: provider.setFirstName,
+                                ),
+                              ),
+                              const Gap(12),
+                              Expanded(
+                                child: _NameField(
+                                  label: 'Last name',
+                                  hint: 'Doe',
+                                  prefix: icProfile,
+                                  value: state.lastName,
+                                  error: state.lastNameError,
+                                  onChange: provider.setLastName,
+                                ),
+                              ),
+                            ],
+                          )
+                        else ...[
+                          _NameField(
+                            label: 'First name',
+                            hint: 'Jane',
+                            prefix: icProfile,
+                            value: state.firstName,
+                            error: state.firstNameError,
+                            onChange: provider.setFirstName,
+                          ),
+                          const Gap(16),
+                          _NameField(
+                            label: 'Last name',
+                            hint: 'Doe',
+                            prefix: icProfile,
+                            value: state.lastName,
+                            error: state.lastNameError,
+                            onChange: provider.setLastName,
+                          ),
+                        ],
+                        const Gap(16),
+                        const AuthFieldLabel(label: 'Industry'),
+                        const Gap(8),
+                        InputField(
+                          hint: 'e.g. SaaS, Fintech, E-commerce',
+                          prefix: briefcase,
+                          value: state.industry,
+                          error: state.industryError,
+                          onChange: provider.setIndustry,
+                        ),
+                      ],
+                    ),
+
+                    const Gap(28),
+
+                    // Account section
+                    AuthFormSection(
+                      title: 'ACCOUNT',
+                      children: [
+                        const AuthFieldLabel(label: 'Work email'),
+                        const Gap(8),
+                        InputField(
+                          hint: 'you@company.com',
+                          prefix: icEmail,
+                          value: state.email,
+                          error: state.emailError,
+                          inputType: TextInputType.emailAddress,
+                          onChange: provider.setEmail,
+                        ),
+                        const Gap(16),
+                        const AuthFieldLabel(label: 'Password'),
+                        const Gap(8),
+                        InputField(
+                          hint: 'Min. 8 characters',
+                          prefix: icPassword,
+                          value: state.password,
+                          error: state.passwordError,
+                          inputType: TextInputType.visiblePassword,
+                          isPassword: true,
+                          onChange: provider.setPassword,
+                        ),
+                        const Gap(16),
+                        const AuthFieldLabel(label: 'Confirm password'),
+                        const Gap(8),
+                        InputField(
+                          hint: 'Re-enter your password',
+                          prefix: icPassword,
+                          value: state.confirmPassword,
+                          error: state.confirmPasswordError,
+                          inputType: TextInputType.visiblePassword,
+                          isPassword: true,
+                          onChange: provider.setConfirmPassword,
+                        ),
+                      ],
+                    ),
+
+                    const Gap(32),
+                    Button(
+                      title: 'Create account',
+                      isEnabled: state.isValidated && !provider.loading,
+                      isLoading: provider.loading,
+                      onPressed: provider.register,
+                    ),
+                    const Gap(28),
+                    AuthFooterLink(
+                      prompt: 'Already have an account? ',
+                      action: 'Sign in',
+                      onTap: () => context.push(const LoginScreen()),
                     ),
                   ],
                 ),
               ),
             ),
-            const Gap(20),
-          ],
-        );
-
-        return [
-          Expanded(
-            child: Responsive(
-              mobile: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(children: [formContent]),
-              ),
-              desktop: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFF2A2D3A), Color(0xFF131314)],
-                        ),
-                        border: Border.all(color: Colors.white10),
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.auto_awesome,
-                              size: 64,
-                              color: electricBlue,
-                            ),
-                            const Gap(24),
-                            Text(
-                              'CrowdVise',
-                              style: theme.textTheme.displayLarge?.copyWith(
-                                fontSize: 40,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const Gap(16),
-                            Text(
-                              'The intelligent platform for testing\nyour ideas with AI personas.',
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontSize: 18,
-                                color: Colors.white60,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  ScrollableWidget(
-                    children: [
-                      Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 450),
-                          child: formContent,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
           ),
         ];
       },
+    );
+  }
+}
+
+class _NameField extends StatelessWidget {
+  const _NameField({
+    required this.label,
+    required this.hint,
+    required this.prefix,
+    required this.value,
+    required this.error,
+    required this.onChange,
+  });
+
+  final String label;
+  final String hint;
+  final String prefix;
+  final String value;
+  final String? error;
+  final ValueChanged<String> onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AuthFieldLabel(label: label),
+        const Gap(8),
+        InputField(
+          hint: hint,
+          prefix: prefix,
+          value: value,
+          error: error,
+          onChange: onChange,
+        ),
+      ],
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:crowdvise/core/di/core_module_container.dart';
+import 'package:crowdvise/core/domain/api_response/api_result.dart';
 import 'package:crowdvise/core/domain/validation/validation.dart';
 import 'package:crowdvise/core/presentation/manager/custom_provider.dart';
 import 'package:crowdvise/features/auth/domain/repository/auth_repository.dart';
@@ -7,6 +8,9 @@ import 'package:crowdvise/features/auth/domain/usecases/sign_up_usecase.dart';
 import 'package:crowdvise/features/auth/presentation/manager/auth_state.dart';
 
 class AuthProvider extends CustomProvider {
+  AuthProvider({this.isLogin = false});
+
+  final bool isLogin;
   final state = AuthState();
   final _repo = getIt.get<AuthRepository>();
 
@@ -30,7 +34,14 @@ class AuthProvider extends CustomProvider {
 
   void setPassword(String password) {
     state.password = password;
-    state.passwordError = password.validatePassword();
+    state.passwordError =
+        isLogin ? password.validateLoginPassword() : password.validatePassword();
+    // Keep the confirm field in sync while typing.
+    if (state.confirmPassword.isNotEmpty) {
+      state.confirmPasswordError = state.confirmPassword.validateRePassword(
+        password,
+      );
+    }
     _validateInfo();
   }
   void setIndustry(String industry) {
@@ -48,48 +59,57 @@ class AuthProvider extends CustomProvider {
   }
 
   void _validateInfo() {
-    state.isValidated = [
-      state.firstName.validateField() == null,
-      state.lastName.validateField() == null,
-      state.email.validateField() == null,
-      state.industry.validateField() == null,
-      state.password.validateField() == null,
-      state.confirmPassword.validateRePassword(state.password) == null,
-    ].validate();
+    final emailOk = state.email.validateEmail() == null;
+    final passwordOk = isLogin
+        ? state.password.validateLoginPassword() == null
+        : state.password.validatePassword() == null;
+
+    if (isLogin) {
+      state.isValidated = emailOk && passwordOk;
+    } else {
+      state.isValidated = [
+        state.firstName.validateFirstName() == null,
+        state.lastName.validateLastName() == null,
+        emailOk,
+        state.industry.validateField() == null,
+        passwordOk,
+        state.confirmPassword.validateRePassword(state.password) == null,
+      ].validate();
+    }
     notifyListeners();
   }
 
-  void register() {
-    onLoad();
-
-    final result = SignUpUsecase(_repo, state.toSignUpPayload()).invoke();
-    result.then((value) {
+  Future<void> register() async {
+    if (loading || !state.isValidated) return;
+    setLoading(true);
+    try {
+      final value = await SignUpUsecase(_repo, state.toSignUpPayload()).invoke();
       final result = value.getOrElse((error) {
         add(error);
         return null;
       });
-
-      if (result != null) {
-        add(result);
-      }
-      onLoad();
-    });
+      if (result != null) add(result);
+    } catch (e) {
+      add(ApiResult.failure(e).toError());
+    } finally {
+      setLoading(false);
+    }
   }
 
-  void login() {
-    onLoad();
-
-    final result = LoginUsecase(_repo, state.toLoginPayload()).invoke();
-    result.then((value) {
+  Future<void> login() async {
+    if (loading) return;
+    setLoading(true);
+    try {
+      final value = await LoginUsecase(_repo, state.toLoginPayload()).invoke();
       final result = value.getOrElse((error) {
         add(error);
         return null;
       });
-
-      if (result != null) {
-        add(result);
-      }
-      onLoad();
-    });
+      if (result != null) add(result);
+    } catch (e) {
+      add(ApiResult.failure(e).toError());
+    } finally {
+      setLoading(false);
+    }
   }
 }

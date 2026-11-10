@@ -1,19 +1,20 @@
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
 import 'package:crowdvise/features/splash/widget/avatar_grid.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 class SolutionScreen extends StatelessWidget {
   const SolutionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const AvatarGrid2(),
-          const Spacer(),
+          const Gap(24),
           const Text(
             'THE SOLUTION',
             style: TextStyle(
@@ -53,6 +54,7 @@ class SolutionScreen extends StatelessWidget {
               height: 1.5,
             ),
           ),
+          const Gap(24),
         ],
       ),
     );

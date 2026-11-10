@@ -18,7 +18,7 @@ class ScrollableWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget child = SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: padding),
-      physics: const BouncingScrollPhysics(),
+      physics: const ClampingScrollPhysics(),
       child: Column(
         crossAxisAlignment: alignment,
         children: children,

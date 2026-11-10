@@ -5,6 +5,10 @@ import 'package:crowdvise/features/session/domain/models/simulation_model.dart';
 import 'package:crowdvise/features/session/domain/models/simulation_payload.dart';
 
 class SessionState {
+  SessionState() {
+    selectedPanelSize = panelSize[1];
+  }
+
   bool isValidated = false;
   String productDescription = "";
   String? productDescriptionError;
@@ -18,6 +22,8 @@ class SessionState {
   String? journeyDescriptionError;
   GeneratedJourneyModel? generatedJourneyModel;
   SimulationModel? simulationModel;
+  String? experimentId;
+  int? rerunsRemaining;
 
   PanelSize? selectedPanelSize;
   final List<PanelSize> panelSize = [

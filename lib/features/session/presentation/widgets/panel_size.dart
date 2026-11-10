@@ -1,10 +1,8 @@
-
 import 'package:crowdvise/core/presentation/theme/colors/colors.dart';
-import 'package:crowdvise/core/presentation/widgets/clickable.dart';
 import 'package:crowdvise/features/session/domain/models/panel_size.dart';
 import 'package:flutter/material.dart';
 
-class PanelSizeWidget extends StatelessWidget {
+class PanelSizeWidget extends StatefulWidget {
   const PanelSizeWidget({
     super.key,
     required this.isSelected,
@@ -17,57 +15,65 @@ class PanelSizeWidget extends StatelessWidget {
   final PanelSize size;
 
   @override
+  State<PanelSizeWidget> createState() => _PanelSizeWidgetState();
+}
+
+class _PanelSizeWidgetState extends State<PanelSizeWidget> {
+  bool _hover = false;
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final sel = widget.isSelected;
     return Expanded(
-      child: Clickable(
-        onPressed: () {
-          onSelect();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? electricBlue.withValues(alpha: .09)
-                : const Color(0xFF131314),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? electricBlue : Colors.white10,
-              width: 1.5,
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: widget.onSelect,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+            decoration: BoxDecoration(
+              color: sel ? Colors.white.withValues(alpha: 0.06) : wsCard,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: sel
+                    ? signal
+                    : _hover
+                        ? hairlineStrong
+                        : hairline,
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 4,
-            children: [
-              Text(
-                size.value,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: isSelected ? electricBlue : white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 24,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.size.value,
+                  style: TextStyle(
+                    fontFamily: 'Syne',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: sel ? textPrimary : textSecondary,
+                    height: 1,
+                  ),
                 ),
-              ),
-              Text(
-                size.title,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: grey300,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                const SizedBox(height: 8),
+                Text(
+                  widget.size.title,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: textPrimary,
+                  ),
                 ),
-              ),
-              Text(
-                size.estimatedTime,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: grey900,
-                  fontSize: 10,
+                const SizedBox(height: 2),
+                Text(
+                  widget.size.estimatedTime,
+                  style: const TextStyle(fontSize: 11.5, color: textTertiary),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

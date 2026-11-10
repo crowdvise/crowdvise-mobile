@@ -1,4 +1,5 @@
 import 'package:crowdvise/core/di/core_module_container.dart';
+import 'package:crowdvise/core/domain/api_response/api_result.dart';
 import 'package:crowdvise/core/domain/validation/validation.dart';
 import 'package:crowdvise/core/presentation/manager/custom_provider.dart';
 import 'package:crowdvise/core/presentation/utils/util_functions.dart';
@@ -63,32 +64,46 @@ class SessionProvider extends CustomProvider {
     notifyListeners();
   }
 
-  void generateJourney() {
-    onLoad();
+  Future<void> generateJourney() async {
+    if (loading) return;
+    setLoading(true);
+    try {
+      final value = await GenerateJourneyUsecase(
+        _repo,
+        state.toJourneyPayload(),
+      ).invoke();
 
-    final result = GenerateJourneyUsecase(
-      _repo,
-      state.toJourneyPayload(),
-    ).invoke();
-    result.then((value) {
       final result = value.getOrElse((error) {
         add(error);
         return null;
       });
 
       if (result != null) {
-        add(result);
         state.journeyStages = result.journeyStages;
         logg('Number of stages: ${state.journeyStages.length}');
+        add(result);
       }
-      onLoad();
-    });
+    } catch (e, stack) {
+      debugPrint('generateJourney error: $e');
+      debugPrintStack(stackTrace: stack);
+      add(ApiResult.failure(e).toError());
+    } finally {
+      setLoading(false);
+    }
   }
 
   Future<void> runSimulation({required List<JourneyStageModel> stages}) async {
+    if (loading) return;
+    if (stages.isEmpty) {
+      add('Add at least one stage before running the simulation.');
+      return;
+    }
+    if (state.selectedPanelSize == null) {
+      add('Choose a panel size before running the simulation.');
+      return;
+    }
+    setLoading(true);
     try {
-      onLoad();
-
       final value = await RunSimulationUsecase(
         _repo,
         state.toSimulationPayload(
@@ -104,15 +119,17 @@ class SessionProvider extends CustomProvider {
       });
 
       if (result != null) {
+        state.simulationModel = result.result;
+        state.experimentId = result.experimentId;
+        state.rerunsRemaining = result.rerunsRemaining;
         add(result);
-        state.simulationModel = result;
       }
     } catch (e, stack) {
       debugPrint('runSimulation error: $e');
       debugPrintStack(stackTrace: stack);
-      add(e);
+      add(ApiResult.failure(e).toError());
     } finally {
-      onLoad();
+      setLoading(false);
     }
   }
 

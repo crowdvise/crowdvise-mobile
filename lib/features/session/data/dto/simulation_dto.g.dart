@@ -8,21 +8,14 @@ part of 'simulation_dto.dart';
 
 SimulationDto _$SimulationDtoFromJson(Map<String, dynamic> json) =>
     SimulationDto(
-      simulationId: json['simulation_id'] as String,
-      overallConversionRate: (json['overall_conversion_rate'] as num)
-          .toDouble(),
-      overallDropoutRate: (json['overall_dropout_rate'] as num).toDouble(),
-      overallDelayedRate: (json['overall_delayed_rate'] as num).toDouble(),
-      agentJourneys: (json['agent_journeys'] as List<dynamic>)
-          .map((e) => AgentJourneyDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      stageInsights: (json['stage_insights'] as List<dynamic>)
-          .map((e) => StageInsightDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      topInsights: (json['top_insights'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      readinessScore: (json['readiness_score'] as num).toInt(),
+      simulationId: jsonString(json['simulation_id']),
+      overallConversionRate: jsonDouble(json['overall_conversion_rate']),
+      overallDropoutRate: jsonDouble(json['overall_dropout_rate']),
+      overallDelayedRate: jsonDouble(json['overall_delayed_rate']),
+      agentJourneys: _journeys(json['agent_journeys']),
+      stageInsights: _stages(json['stage_insights']),
+      topInsights: jsonStringList(json['top_insights']),
+      readinessScore: jsonInt(json['readiness_score']),
     );
 
 Map<String, dynamic> _$SimulationDtoToJson(SimulationDto instance) =>
@@ -39,12 +32,10 @@ Map<String, dynamic> _$SimulationDtoToJson(SimulationDto instance) =>
 
 AgentJourneyDto _$AgentJourneyDtoFromJson(Map<String, dynamic> json) =>
     AgentJourneyDto(
-      agent: AgentDto.fromJson(json['agent'] as Map<String, dynamic>),
-      reactions: (json['reactions'] as List<dynamic>)
-          .map((e) => ReactionDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      finalOutcome: json['final_outcome'] as String,
-      droppedAtStage: json['dropped_at_stage'] as String?,
+      agent: _agent(json['agent']),
+      reactions: _reactions(json['reactions']),
+      finalOutcome: jsonString(json['final_outcome']),
+      droppedAtStage: jsonStringOrNull(json['dropped_at_stage']),
     );
 
 Map<String, dynamic> _$AgentJourneyDtoToJson(AgentJourneyDto instance) =>
@@ -56,21 +47,19 @@ Map<String, dynamic> _$AgentJourneyDtoToJson(AgentJourneyDto instance) =>
     };
 
 AgentDto _$AgentDtoFromJson(Map<String, dynamic> json) => AgentDto(
-  id: json['id'] as String,
-  name: json['name'] as String,
-  age: (json['age'] as num).toInt(),
-  gender: json['gender'] as String,
-  location: json['location'] as String,
-  incomeBracket: json['income_bracket'] as String,
-  decisionStyle: json['decision_style'] as String,
-  frictionThreshold: (json['friction_threshold'] as num).toInt(),
-  backstory: json['backstory'] as String,
-  ocean: OceanDto.fromJson(json['ocean'] as Map<String, dynamic>),
-  statusQuoTendency: (json['status_quo_tendency'] as num).toDouble(),
-  triggerSensitivities: TriggerSensitivitiesDto.fromJson(
-    json['trigger_sensitivities'] as Map<String, dynamic>,
-  ),
-  lifestyleNotes: json['lifestyle_notes'] as String,
+  id: jsonString(json['id']),
+  name: jsonString(json['name']),
+  age: jsonInt(json['age']),
+  gender: jsonString(json['gender']),
+  location: jsonString(json['location']),
+  incomeBracket: jsonString(json['income_bracket']),
+  decisionStyle: jsonString(json['decision_style']),
+  frictionThreshold: jsonInt(json['friction_threshold']),
+  backstory: jsonString(json['backstory']),
+  ocean: _ocean(json['ocean']),
+  statusQuoTendency: jsonDouble(json['status_quo_tendency']),
+  triggerSensitivities: _triggers(json['trigger_sensitivities']),
+  lifestyleNotes: jsonString(json['lifestyle_notes']),
 );
 
 Map<String, dynamic> _$AgentDtoToJson(AgentDto instance) => <String, dynamic>{
@@ -90,11 +79,11 @@ Map<String, dynamic> _$AgentDtoToJson(AgentDto instance) => <String, dynamic>{
 };
 
 OceanDto _$OceanDtoFromJson(Map<String, dynamic> json) => OceanDto(
-  openness: (json['openness'] as num).toDouble(),
-  conscientiousness: (json['conscientiousness'] as num).toDouble(),
-  extraversion: (json['extraversion'] as num).toDouble(),
-  agreeableness: (json['agreeableness'] as num).toDouble(),
-  neuroticism: (json['neuroticism'] as num).toDouble(),
+  openness: jsonDouble(json['openness']),
+  conscientiousness: jsonDouble(json['conscientiousness']),
+  extraversion: jsonDouble(json['extraversion']),
+  agreeableness: jsonDouble(json['agreeableness']),
+  neuroticism: jsonDouble(json['neuroticism']),
 );
 
 Map<String, dynamic> _$OceanDtoToJson(OceanDto instance) => <String, dynamic>{
@@ -108,12 +97,12 @@ Map<String, dynamic> _$OceanDtoToJson(OceanDto instance) => <String, dynamic>{
 TriggerSensitivitiesDto _$TriggerSensitivitiesDtoFromJson(
   Map<String, dynamic> json,
 ) => TriggerSensitivitiesDto(
-  unexpectedCost: (json['unexpected_cost'] as num).toDouble(),
-  trustViolation: (json['trust_violation'] as num).toDouble(),
-  cognitiveLoad: (json['cognitive_load'] as num).toDouble(),
-  effortCost: (json['effort_cost'] as num).toDouble(),
-  valueMismatch: (json['value_mismatch'] as num).toDouble(),
-  statusQuoInertia: (json['status_quo_inertia'] as num).toDouble(),
+  unexpectedCost: jsonDouble(json['unexpected_cost']),
+  trustViolation: jsonDouble(json['trust_violation']),
+  cognitiveLoad: jsonDouble(json['cognitive_load']),
+  effortCost: jsonDouble(json['effort_cost']),
+  valueMismatch: jsonDouble(json['value_mismatch']),
+  statusQuoInertia: jsonDouble(json['status_quo_inertia']),
 );
 
 Map<String, dynamic> _$TriggerSensitivitiesDtoToJson(
@@ -128,14 +117,14 @@ Map<String, dynamic> _$TriggerSensitivitiesDtoToJson(
 };
 
 ReactionDto _$ReactionDtoFromJson(Map<String, dynamic> json) => ReactionDto(
-  stageOrder: (json['stage_order'] as num).toInt(),
-  stageName: json['stage_name'] as String,
-  behaviour: json['behaviour'] as String,
-  internalMonologue: json['internal_monologue'] as String,
-  frictionTriggered: json['friction_triggered'] as String?,
-  frictionCost: (json['friction_cost'] as num).toInt(),
-  remainingThreshold: (json['remaining_threshold'] as num).toInt(),
-  whatWouldChangeThis: json['what_would_change_this'] as String?,
+  stageOrder: jsonInt(json['stage_order']),
+  stageName: jsonString(json['stage_name']),
+  behaviour: jsonString(json['behaviour']),
+  internalMonologue: jsonString(json['internal_monologue']),
+  frictionTriggered: jsonStringOrNull(json['friction_triggered']),
+  frictionCost: jsonInt(json['friction_cost']),
+  remainingThreshold: jsonInt(json['remaining_threshold']),
+  whatWouldChangeThis: jsonStringOrNull(json['what_would_change_this']),
 );
 
 Map<String, dynamic> _$ReactionDtoToJson(ReactionDto instance) =>
@@ -152,11 +141,11 @@ Map<String, dynamic> _$ReactionDtoToJson(ReactionDto instance) =>
 
 StageInsightDto _$StageInsightDtoFromJson(Map<String, dynamic> json) =>
     StageInsightDto(
-      stageName: json['stage_name'] as String,
-      dropoutRate: (json['dropout_rate'] as num).toDouble(),
-      delayRate: (json['delay_rate'] as num).toDouble(),
-      topFrictionTrigger: json['top_friction_trigger'] as String?,
-      confusionRate: (json['confusion_rate'] as num).toInt(),
+      stageName: jsonString(json['stage_name']),
+      dropoutRate: jsonDouble(json['dropout_rate']),
+      delayRate: jsonDouble(json['delay_rate']),
+      topFrictionTrigger: jsonStringOrNull(json['top_friction_trigger']),
+      confusionRate: jsonInt(json['confusion_rate']),
     );
 
 Map<String, dynamic> _$StageInsightDtoToJson(StageInsightDto instance) =>

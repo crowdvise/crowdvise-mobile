@@ -22,7 +22,7 @@ class AccountProvider extends CustomProvider {
   final state = AccountState();
 
   Future<void> _fetchUser() async {
-    onLoad();
+    setLoading(true);
     try {
       final pref = await getIt.getAsync<SharedPreferences>();
       final userString = pref.getString(user);
@@ -34,16 +34,20 @@ class AccountProvider extends CustomProvider {
         state.userModel = userModel;
       }
     } catch (e) {
-      // Failed to parse
+      // Failed to parse; the account screen falls back to Guest.
     } finally {
-      onLoad();
+      setLoading(false);
     }
   }
 
   Future<void> logout() async {
+    accessToken = '';
+    userType = '';
+    currentRole = null;
     final pref = await getIt.getAsync<SharedPreferences>();
     await pref.remove(tokenKey);
     await pref.remove(user);
     await pref.remove(currentEmail);
+    await pref.remove(userRoleKey);
   }
 }

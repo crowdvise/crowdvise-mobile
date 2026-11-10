@@ -1,14 +1,20 @@
 {
-    "name": "crowdvise",
-    "short_name": "crowdvise",
+    "name": "CrowdVise: AI customer research",
+    "short_name": "CrowdVise",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#07080C",
+    "theme_color": "#FF5C00",
+    "description": "Synthetic customer panels that simulate your product journey and surface adoption scores, objections, and fixes.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
+        {
+            "src": "favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",

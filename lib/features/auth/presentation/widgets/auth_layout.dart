@@ -41,7 +41,7 @@ class AuthScreenLayout extends StatelessWidget {
               child: AuthHeroPanel(tagline: heroTagline, pills: heroPills),
             ),
           ),
-          const VerticalDivider(width: 1, color: hairline),
+          // const VerticalDivider(width: 1, color: hairline),
           Expanded(
             flex: isTablet ? 6 : 5,
             child: Center(
@@ -56,10 +56,10 @@ class AuthScreenLayout extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (showBackButton) ...[
-                        _BackLink(onTap: onBack),
-                        const Gap(28),
-                      ],
+                      // if (showBackButton) ...[
+                      //   _BackLink(onTap: onBack),
+                      //   const Gap(28),
+                      // ],
                       form,
                     ],
                   ),
@@ -324,35 +324,35 @@ class AuthFooterLink extends StatelessWidget {
   }
 }
 
-class _BackLink extends StatelessWidget {
-  const _BackLink({this.onTap});
-  final VoidCallback? onTap;
+// class _BackLink extends StatelessWidget {
+//   const _BackLink({required this.onTap});
+//   final VoidCallback? onTap;
 
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap ?? () => Navigator.of(context).maybePop(),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.arrow_back_rounded, size: 14, color: textTertiary),
-            Gap(6),
-            Text(
-              'Back to Crowdvise',
-              style: TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w600,
-                color: textTertiary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return MouseRegion(
+//       cursor: SystemMouseCursors.click,
+//       child: GestureDetector(
+//         onTap: onTap ?? () => Navigator.of(context).maybePop(),
+//         child: const Row(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Icon(Icons.arrow_back_rounded, size: 14, color: textTertiary),
+//             Gap(6),
+//             Text(
+//               'Back to Crowdvise',
+//               style: TextStyle(
+//                 fontSize: 12.5,
+//                 fontWeight: FontWeight.w600,
+//                 color: textTertiary,
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class _BackButton extends StatelessWidget {
   const _BackButton({this.onTap});

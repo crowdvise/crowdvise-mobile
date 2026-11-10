@@ -111,19 +111,33 @@ class LandingContent {
     ),
   ];
 
-  /// Update names, roles, and bios for the real team.
+  /// Ebuka's portrait is local (`assets/images/ebuka.jpeg`); the second
+  /// member's photo and links are still placeholders.
   static const team = [
     LandingTeamMember(
-      name: 'Ihekwaba Kingsley',
-      role: 'Founder',
-      initials: 'IK',
+      name: 'Ebuka Ihekwaba',
+      role: 'Founder & Software Engineer',
+      initials: 'EI',
+      photoUrl: 'assets/images/ebuka.jpeg',
+      github: 'https://github.com/quabiee07',
+      portfolio: 'https://ebuka-ihekwaba.vercel.app/',
+      x: 'https://x.com/quabiee',
+      linkedin: 'https://www.linkedin.com/in/kingsley-ihekwaba-9365ab206/',
+      email: 'mailto:kingsleyihekwaba208@gmail.com',
       bio:
           'Building Crowdvise so teams can stress-test products with synthetic customers before they ship.',
     ),
     LandingTeamMember(
-      name: 'Co-founder',
-      role: 'Co-founder',
-      initials: 'CF',
+      name: 'Olajumoke Taiwo',
+      role: 'Co-founder & AI Backend Engineer',
+      initials: 'OT',
+      photoUrl:
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80',
+      github: 'https://github.com/olajumoketaiwo',
+      portfolio: 'https://olajumoketaiwo.com',
+      x: 'https://x.com/olajumoketaiwo',
+      linkedin: 'https://www.linkedin.com/in/olajumoketaiwo',
+      email: 'mailto:olajumoke@crowdvise.com',
       bio:
           'Partnering on product, research quality, and the experience that makes insights actually usable.',
     ),
@@ -182,11 +196,23 @@ class LandingTeamMember {
     required this.name,
     required this.role,
     required this.initials,
+    required this.photoUrl,
+    required this.github,
+    required this.portfolio,
+    required this.x,
+    required this.linkedin,
+    required this.email,
     required this.bio,
   });
 
   final String name;
   final String role;
   final String initials;
+  final String photoUrl;
+  final String github;
+  final String portfolio;
+  final String x;
+  final String linkedin;
+  final String email;
   final String bio;
 }

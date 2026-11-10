@@ -1,29 +1,141 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:crowdvise/core/presentation/app.dart';
+import 'package:crowdvise/features/landing/presentation/widgets/flip_text.dart';
+import 'package:crowdvise/features/landing/presentation/widgets/halftone_horizon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+Widget _app(Widget child, {bool disableAnimations = false}) {
+  return MaterialApp(
+    home: MediaQuery(
+      data: MediaQueryData(disableAnimations: disableAnimations),
+      child: Scaffold(body: Center(child: child)),
+    ),
+  );
+}
+
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const CrowdViseApp());
+  group('FlipText', () {
+    testWidgets('renders every word and settles at full opacity', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          const FlipText(
+            text: 'Know what customers think,',
+            style: TextStyle(fontSize: 32),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      for (final word in ['Know', 'what', 'customers', 'think,']) {
+        expect(find.text(word), findsOneWidget);
+      }
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      final opacities = tester.widgetList<Opacity>(
+        find.descendant(
+          of: find.byType(FlipText),
+          matching: find.byType(Opacity),
+        ),
+      );
+      expect(opacities, isNotEmpty);
+      expect(opacities.every((o) => o.opacity == 1), isTrue);
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    testWidgets('renders plain text when animations are disabled', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          const FlipText(
+            text: 'Know what customers think,',
+            style: TextStyle(fontSize: 32),
+          ),
+          disableAnimations: true,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Know what customers think,'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(FlipText),
+          matching: find.byType(Opacity),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('restarts the flip when the text changes', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          const FlipText(
+            text: 'First phrase',
+            style: TextStyle(fontSize: 32),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(
+        _app(
+          const FlipText(
+            text: 'Second phrase',
+            style: TextStyle(fontSize: 32),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final opacities = tester.widgetList<Opacity>(
+        find.descendant(
+          of: find.byType(FlipText),
+          matching: find.byType(Opacity),
+        ),
+      );
+      expect(opacities.any((o) => o.opacity < 1), isTrue);
+
+      await tester.pumpAndSettle();
+      expect(find.text('Second'), findsOneWidget);
+    });
+  });
+
+  group('HalftoneHorizon', () {
+    testWidgets('paints a non-interactive, repaint-bounded layer', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          const SizedBox(
+            width: 400,
+            height: 300,
+            child: HalftoneHorizon(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(HalftoneHorizon), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(HalftoneHorizon),
+          matching: find.byType(IgnorePointer),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(HalftoneHorizon),
+          matching: find.byType(RepaintBoundary),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(HalftoneHorizon),
+          matching: find.byType(CustomPaint),
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }
